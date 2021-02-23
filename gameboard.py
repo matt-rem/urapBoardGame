@@ -1,5 +1,6 @@
 import square as sq
 import player as pl
+#import position as pos
 
 
 class Gameboard:

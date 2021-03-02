@@ -85,7 +85,7 @@ class Gameboard:
 		self.gameOver = True
 
 		return #TERMINATE THE GAME!
-	def move(self, player, distance):
+	def takeTurn(self, player, distance):
 		
 		while not self.gameOver and distance > 1:
 			currentSq = player.getSquare()
@@ -100,11 +100,11 @@ class Gameboard:
 
 		return 
 
-	def takeTurn():
+	def play():
 		while not self.gameOver:
 			player = self.getPlayerTurn()
 			roll = 1 #PROMPT A ROLL!!!!!!!!!!!!!!!!!!! int(Math.random)*6 + 1 would make it play itself
-			self.move(player, roll)
+			self.takeTurn(player, roll)
 
 		return
 
@@ -112,12 +112,6 @@ class Gameboard:
 	Helps Debug. Prints a 2D array nicely
 	'''
 	def printTable(self, arr):
-		'''
-		data = genfromtxt('Sample CSV File Template for BoardGameGenerator - Sheet1.csv', delimiter=',')
-		data = np.nan_to_num(data) 
-		data = np.round(data).astype(int)
-		data = np.savetxt('Sample CSV File Template for BoardGameGenerator - Sheet1.csv', data, fmt="%s")
-		'''
 		for i in arr:
 			print(i)
 			print()

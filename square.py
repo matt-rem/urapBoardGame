@@ -3,23 +3,21 @@
 
 class Square:
 
-	players = []
 	goal = False
+	special = None
+	nextSquare = None
 
 	def __init__(self, x, y):
 		self.position = x,y
 
-	def addPlayer(self, player):
-		self.players.append(player)
-		return
-
-	def removePlayer(self, player):
-		self.players.remove(player)
-		return
-
-	def getPlayers(self):
-		return players
+	def getCoords(self):
+		return self.position
 	
+	def getNextSquare(self):
+		return self.nextSquare
+
+	def hasNextSquare(self):
+		return nextSquare == True
 	'''wanted to add methods for snakes and ladders if the square is either the bottom of a ladder or the start of a snake, we can set
 	the position of the square the player will eventually land on. 
 	

@@ -2,7 +2,7 @@ import square as sq
 import player as pl
 import numpy as np
 import itertools as it
-import GUI
+#import GUI
 from numpy import genfromtxt
 
 

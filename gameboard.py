@@ -1,6 +1,7 @@
 import square as sq
 import player as pl
 import numpy as np
+import dice as d
 import itertools as it
 #import GUI
 #from PIL import Image
@@ -123,12 +124,28 @@ class Gameboard:
 		#screen size will be the size of the board
 		screen = pygame.display.set_mode((background_x,background_y))
 		
-		print(background.get_size()[1])
+		running =True
+		all_sprites = pygame.sprite.Group()
+		mydice = d.dice(300,300)
+		all_sprites.add(mydice)
+	
+		
 		#while not self.gameOver:
-		while True:
-			screen.fill((0,0,0))
-			screen.blit(background,(0,0))
-			pygame.display.update()
+		while running:
+                        for event in pygame.event.get():
+                                if event.type == pygame.QUIT:
+                                        running = False
+                                elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                                        mydice.roll()
+                                        
+                        all_sprites.update()
+                                        
+                        screen.fill((0,0,0))
+                        #all_sprites.draw(screen)
+		
+                        screen.blit(background,(0,0))
+                        all_sprites.draw(screen)
+                        pygame.display.update()
 			#player = self.getPlayerTurn()
 			#roll = 1 #PROMPT A ROLL!!!!!!!!!!!!!!!!!!! int(Math.random)*6 + 1 would make it play itself
 			#self.takeTurn(player, roll)

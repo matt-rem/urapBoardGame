@@ -3,6 +3,10 @@ import player as pl
 import numpy as np
 import itertools as it
 #import GUI
+#from PIL import Image
+import math
+import pygame #used for GUI
+
 from numpy import genfromtxt
 
 
@@ -107,11 +111,27 @@ class Gameboard:
 
 		return 
 	#Checks if the game has been won and if not allows a player to take his or her turn.
-	def play():
-		while not self.gameOver:
-			player = self.getPlayerTurn()
-			roll = 1 #PROMPT A ROLL!!!!!!!!!!!!!!!!!!! int(Math.random)*6 + 1 would make it play itself
-			self.takeTurn(player, roll)
+	def play(self,str):
+		print(str)
+		pygame.init() #initialize pygame
+		print(self.board)
+		background = pygame.image.load(self.board)
+		#get the width of the board
+		background_x = background.get_size()[0]
+		#get the height of the board
+		background_y = background.get_size()[1]
+		#screen size will be the size of the board
+		screen = pygame.display.set_mode((background_x,background_y))
+		
+		print(background.get_size()[1])
+		#while not self.gameOver:
+		while True:
+			screen.fill((0,0,0))
+			screen.blit(background,(0,0))
+			pygame.display.update()
+			#player = self.getPlayerTurn()
+			#roll = 1 #PROMPT A ROLL!!!!!!!!!!!!!!!!!!! int(Math.random)*6 + 1 would make it play itself
+			#self.takeTurn(player, roll)
 
 		return
 

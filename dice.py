@@ -18,7 +18,7 @@ class dice(pygame.sprite.Sprite):
 		self.image.fill((0,0,0))
 		self.dice_num = 1
 		self.rect =self.image.get_rect()
-		self.rect.center = ( 835, 25)
+		self.rect.center = ( int(x), int(y))
 		
 	def update(self):
 

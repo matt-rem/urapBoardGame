@@ -28,7 +28,8 @@ class Gameboard:
 
 	winningSquare = None
 	startSquare = None
-
+	dicePosX = 0
+	dicePosY = 0
 	gameOver = False
 
 	def __init__(self, file):
@@ -43,19 +44,25 @@ class Gameboard:
 		data = np.round(data).astype(int)
 		data = np.savetxt('Sample CSV File Template for BoardGameGenerator - Sheet1.csv', data, fmt="%s")
 		'''
-		datafile = open('Sample CSV File Template for BoardGameGenerator - Sheet1.csv', 'r') #Opens the csv file w/info
-		data = list(csv.reader(datafile))#data = 2d array of csv file components
+		#datafile = open('Sample CSV File Template for BoardGameGenerator - Sheet1.csv', 'r') #Opens the csv file w/info
+		with open('sample.csv', newline='') as csvfile:
+                        data = list(csv.reader(csvfile))
+		
 		self.gameName = data[1][0]
+		print(self.gameName)
 		self.playerCount = int(data[1][1])
+		print(self.playerCount)
+		#ignore last row
 		for i in range(1, len(data)): #Adds all the squares to allSquares, sets .nextquare, .special, and the x and y cooridantes properly. Also sets winningSquare and startSquare.
 
 			
 			square = sq.Square(data[i][2], data[i][3])
-			for j in range(len(self.duplicateSquares)):
+			# if there are duplicates squares maybe a square is missing and an exception should be thrown? 
+			'''for j in range(len(self.duplicateSquares)):
 				if self.duplicateSquares[j] == square:
 					square = self.duplicateSquares.pop(j)
 					break
-
+                        '''
 			if data[i][4]:
 				if data[i][4] == "start":
 					self.startSquare = square
@@ -68,14 +75,22 @@ class Gameboard:
 				nextSquare = sq.Square(data[i][5], data[i][6])
 				square.nextSquare = nextSquare
 				self.duplicateSquares.append(nextSquare)
-		for i in range(self.playerCount): #Names each player and sets their square to the first square
-			name = "test" #PROMPT TO ENTER NAME!!!!!!!!!!!!!!!!!!!
-			p = pl.Player(name)
-			p.setSquare(self.startSquare)
-			self.players.append(p)
+		a = len(data) -1		
+		global dicePosX
+		dicePosX = data[int(a)][2]
+		global dicePosY
+		dicePosY = data[int(a)][3]
+		print(dicePosX)
+		print(dicePosY)
+                                
+		#for i in range(self.playerCount): #Names each player and sets their square to the first square
+		#	name = "test" #PROMPT TO ENTER NAME!!!!!!!!!!!!!!!!!!!
+		#	p = pl.Player(name,i, 3 , 3)
+		#	p.setSquare(self.startSquare)
+		#	self.players.append(p)
 
-		self.curentPlayersTurn = it.cycle(self.players)
-
+		#self.curentPlayersTurn = it.cycle(self.players)
+                
 
 
 
@@ -115,7 +130,7 @@ class Gameboard:
 	def play(self,str):
 		print(str)
 		pygame.init() #initialize pygame
-		print(self.board)
+	
 		background = pygame.image.load(self.board)
 		#get the width of the board
 		background_x = background.get_size()[0]
@@ -123,11 +138,26 @@ class Gameboard:
 		background_y = background.get_size()[1]
 		#screen size will be the size of the board
 		screen = pygame.display.set_mode((background_x,background_y))
+		#get dice coordinates
+		y = Gameboard.allSquares[len(Gameboard.allSquares)-1].getCoords()
+		#get start coordinates
+		z= Gameboard.allSquares[0].getCoords()
 		
 		running =True
 		all_sprites = pygame.sprite.Group()
-		mydice = d.dice(300,300)
+		mydice = d.dice(y[0],y[1])
+		p1 = pl.Player('test1',1,int(z[0])+10,int(z[1])+10)
+		p2 = pl.Player('test2',2,int(z[0])-10,int(z[1])-10)
+		p1.setSquare(Gameboard.allSquares[0])
+		p2.setSquare(Gameboard.allSquares[0])
+		
 		all_sprites.add(mydice)
+		all_sprites.add(p1)
+		all_sprites.add(p2)
+		turn = 1
+		currSq1 = 0
+		currSq2 = 0
+		winner = False
 	
 		
 		#while not self.gameOver:
@@ -136,7 +166,28 @@ class Gameboard:
                                 if event.type == pygame.QUIT:
                                         running = False
                                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                                        mydice.roll()
+                                        a = mydice.roll()
+                                        if( turn == 1 and winner == False):
+                                                currSq1 = currSq1 + a
+                                                if( currSq1 >= len(Gameboard.allSquares) - 2):
+                                                        winner = True
+                                                        finalxy = Gameboard.allSquares[len(Gameboard.allSquares) - 2].getCoords()
+                                                        p1.onRoll(int(finalxy[0]),int(finalxy[1]))
+                                                else:                  
+                                                        newxy = Gameboard.allSquares[currSq1].getCoords()
+                                                        p1.onRoll(int(newxy[0]),int(newxy[1]))
+                                                        turn = 2
+                                        elif ( turn == 2 and winner == False):
+                                                currSq2 = currSq2 + a
+                                                if( currSq2 >= len(Gameboard.allSquares) - 2):
+                                                        winner = True
+                                                        finalxy = Gameboard.allSquares[len(Gameboard.allSquares) - 2].getCoords()
+                                                        p2.onRoll(int(finalxy[0]),int(finalxy[1]))
+                                                else:                  
+                                                        newxy = Gameboard.allSquares[currSq2].getCoords()
+                                                        p2.onRoll(int(newxy[0]),int(newxy[1]))
+                                                        turn = 1                   
+                                                          
                                         
                         all_sprites.update()
                                         

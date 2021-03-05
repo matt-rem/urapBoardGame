@@ -1,5 +1,5 @@
 Game Name,Player Count,x coordinate,y coordinate,type,next square,next x ,next y
-,,114,161,1,2,,
+test,2,114,161,start,2,,
 ,,185,150,2,3,,
 ,,268,148,3,4,,
 ,,358,145,4,5,,
@@ -28,5 +28,5 @@ Game Name,Player Count,x coordinate,y coordinate,type,next square,next x ,next y
 ,,586,531,27,28,,
 ,,653,523,28,29,,
 ,,733,525,29,30,,
-,,843,532,30,31,,
-,,835,25,31,32,,
+,,843,532,finish,31,,
+,,835,25,dice,32,,

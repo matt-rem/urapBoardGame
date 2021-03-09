@@ -75,13 +75,13 @@ class Gameboard:
 				nextSquare = sq.Square(data[i][5], data[i][6])
 				square.nextSquare = nextSquare
 				self.duplicateSquares.append(nextSquare)
-		a = len(data) -1		
+		'''a = len(data) -1		
 		global dicePosX
 		dicePosX = data[int(a)][2]
 		global dicePosY
 		dicePosY = data[int(a)][3]
 		print(dicePosX)
-		print(dicePosY)
+		print(dicePosY)'''
                                 
 		#for i in range(self.playerCount): #Names each player and sets their square to the first square
 		#	name = "test" #PROMPT TO ENTER NAME!!!!!!!!!!!!!!!!!!!

@@ -171,11 +171,16 @@ class Gameboard:
                                                 currSq1 = currSq1 + a
                                                 if( currSq1 >= len(Gameboard.allSquares) - 2):
                                                         winner = True
+							#get the coordinates of the final square (finish square)
                                                         finalxy = Gameboard.allSquares[len(Gameboard.allSquares) - 2].getCoords()
+							#put player 1 on finish square
                                                         p1.onRoll(int(finalxy[0]),int(finalxy[1]))
                                                 else:                  
-                                                        newxy = Gameboard.allSquares[currSq1].getCoords()
+                                                        #get the coordinates for the next square you need to go to
+							newxy = Gameboard.allSquares[currSq1].getCoords()
+							#put player 1 on next square
                                                         p1.onRoll(int(newxy[0]),int(newxy[1]))
+							#then it becomes the next player's turn
                                                         turn = 2
                                         elif ( turn == 2 and winner == False):
                                                 currSq2 = currSq2 + a

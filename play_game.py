@@ -9,8 +9,8 @@ import pygame
 pygame.init()
 
 #get the height and width of the board game image we want to use
-#im = Image.open('/Users/klalgudi/Desktop/mygame/board_game.jpg')
-im = Image.open('board_game.jpg')
+#im = Image.open('/Users/klalgudi/Desktop/mygame/board_game.jpg'). Must be first argument.
+im = Image.open(sys.argv[1])
 w, h = im.size 
 
 # create 2 1-dimensional arrays to store x,y positions of every square

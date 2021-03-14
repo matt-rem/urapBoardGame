@@ -5,10 +5,14 @@ class Square:
 
 	goal = False
 	special = None
+	misc1 = None
+	misc2 = None
 	nextSquare = None
+	number = None
 
-	def __init__(self, x, y):
-		self.position = x,y
+	def __init__(self, x, y, number):
+		self.position = x, y
+		self.number = int(number)
 
 	def getCoords(self):
 		return self.position
@@ -16,8 +20,17 @@ class Square:
 	def getNextSquare(self):
 		return self.nextSquare
 
+	def getNumber(self):
+		return self.number
+
 	def hasNextSquare(self):
 		return nextSquare == True
+	#Resolves special rules like taking a ladder if you stand on one.
+	def doSpecial(self):
+		if self.special == "ladder":
+			return self.misc1
+		else:
+			return "resolved"
 	'''wanted to add methods for snakes and ladders if the square is either the bottom of a ladder or the start of a snake, we can set
 	the position of the square the player will eventually land on. 
 	

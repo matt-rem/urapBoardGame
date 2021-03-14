@@ -3,18 +3,26 @@
 # importing the modules 
 import cv2
 import csv 
+import sys
 
 #square position number
 sq_num = 1
 
 #first time opens a csv file (the csv file must already exist)
+'''
 with open('sample.csv', mode='w') as sfile:
-           f_writer = csv.writer(sfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-           f_writer.writerow(['Game Name','Player Count','x coordinate', 'y coordinate', 'type','next square', 'next x ','next y'])   
+    f_writer = csv.writer(sfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    f_writer.writerow(['Game Name','Player Count','x coordinate', 'y coordinate', 'type','next square', 'next x ','next y'])
+    name = input("Enter the name of the game: ")
+    playercount = input("Enter the number of players: ")
+    f_writer.writerow([name, playercount,'', '', '','', '','', ''])
+'''
+dataArray = []
 
-
-
-
+name = input("Enter the name of the game: ")
+playercount = input("Enter the number of players: ")
+dataArray.append(['Game Name','Player Count','x coordinate', 'y coordinate', 'Square Number','Next Square Number', 'type', 'misc1', 'misc2'])
+dataArray.append([name, playercount,'', '', '', '', '', '', ''])
 #click to display the square position, as well as the x, y coordinate of mouse click (preferrably the user should
 #click in the center of the square on the board)
 def click_event(event, x, y, flags, params): 
@@ -29,37 +37,74 @@ def click_event(event, x, y, flags, params):
        
         #append to already open csv file
         #write x, y of mouse click, square position, next square gets square position +1
+        '''
         with open('sample.csv', mode='a') as sfile:
            f_writer = csv.writer(sfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-           f_writer.writerow(['','',x, y, sq_num, sq_num+1,'',''])
+           f_writer.writerow(['','',x, y, sq_num, sq_num + 1,'','', ''])
+        '''
+        dataArray.append(['','', x, y, sq_num, sq_num + 1,'','', ''])
 
         #on the image show the square position number's x, y coordinate
-        cv2.putText(img,str(sq_num) + ':' + '('+str(x) + ',' +
-                    str(y)+')', (x,y), font, 
+        cv2.putText(img,str(sq_num), (x,y), font, 
                     0.5, (0, 0, 0), 2) 
         cv2.imshow('image', img)
 
         #increment the square position for the next click
         sq_num += 1
+    # checking for right mouse clicks: Will prompt to enter 2 square numbers and that will be a ladder.
+    if event == cv2.EVENT_RBUTTONDOWN: 
+  
+        # displaying the coordinates 
+        # on the image window 
+        #print(dataArray)
+        first = input("Enter number of the first square of the ladder or slide: ")
+        second = input("Enter number of the second square of the ladder or slide: ")
+        
+        for i in range(2, len(dataArray)):
+            #print(dataArray[i][4], first)
+            if int(dataArray[i][4]) == int(first):
+                dataArray[i][6] = "ladder"
+                dataArray[i][7] = second
+                break
     
   
 # driver function 
 if __name__=="__main__": 
   
     # reading the image
-    #hard coded for now 
-    img = cv2.imread('board_game.jpg', 1) 
+    #hard coded for now EDIT: Not anymore see below.
+    imgname = str(sys.argv[1])
+    print("Click on the center of each square.")
+
+
+    img = cv2.imread(imgname, 1) #sys.argv[0] =  testBoard.jpg (RUN TERMINAL W/ python mark_squares.py testBoard.jpg)
+
   
     # displaying the image 
     cv2.imshow('image', img) 
   
     # setting mouse hadler for the image 
     # and calling the click_event() function 
+
+
     cv2.setMouseCallback('image', click_event) 
   
-    # press space bar to exit 
+    # press any key to exit 
     #cv2.waitKey(0)
     cv2.waitKey(0) 
+
+
+    print(dataArray)
+    #Delete old csv file
+    f = open("sample.csv", "w")
+    f.truncate()
+    f.close()
+    #Write into csv file
+    with open('sample.csv', mode='a') as sfile:
+        f_writer = csv.writer(sfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        for i in dataArray:
+            f_writer.writerow(i)
+    
   
     # close the window 
     cv2.destroyAllWindows() 

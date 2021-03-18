@@ -1,6 +1,6 @@
 # urapBoardGame
 
-This project is a board game engine. Users can use this project to customize their own board game with their own board game image file.
+This project is a board game engine. Users can use this project to customize their own board game with their own board game image file. The image file must be in the .png or .jpg format.
 
 ### Marking The Squares
 

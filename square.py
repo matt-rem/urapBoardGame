@@ -10,6 +10,9 @@ class Square:
 	nextSquare = None
 	number = None
 
+	#added
+	occupied = False
+
 	def __init__(self, x, y, number):
 		self.position = x, y
 		self.number = int(number)
@@ -19,9 +22,13 @@ class Square:
 	
 	def getNextSquare(self):
 		return self.nextSquare
-
+		
 	def getNumber(self):
 		return self.number
+
+	def setNumber(self, n):
+		self.number = n
+
 
 	def hasNextSquare(self):
 		return nextSquare == True

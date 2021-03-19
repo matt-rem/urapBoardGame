@@ -20,7 +20,7 @@ class Gameboard:
 	players = []
 
 	playerCount = None
-	curentPlayersTurn = 0 #FOR NOW
+	currentPlayersTurn = 0 #FOR NOW
 
 	allSquares = []
 	duplicateSquares = [] # Used in setup to prevent duplicate squares
@@ -31,8 +31,11 @@ class Gameboard:
 	dicePosY = 0
 	gameOver = False
 
-	def __init__(self, file):
+	def __init__(self, file, list_names):
 		self.board = file #IMG file for board
+		self.list_names = list_names.split(",")
+		self.list_names = sorted(self.list_names)
+		print(self.list_names)
 		self.setUp() #Sets up all Squares and players and puts players to starting squares.
 
 
@@ -53,6 +56,7 @@ class Gameboard:
 		self.playerCount = int(data[1][1])
 		#print(self.playerCount)
 		#ignore last row
+		self.allSquares.append(None)
 		for i in range(2, len(data)): #Adds all the squares to allSquares, sets .nextquare, .special, and the x and y cooridantes properly. Also sets winningSquare and startSquare.
 
 			
@@ -98,20 +102,20 @@ class Gameboard:
 
 
 	def getWinningSquare(self):
-		return winningSquare
+		return self.winningSquare
 
 	def getStartSquare(self):
-		return startSquare
+		return self.startSquare
 
-	def getPlayerTurn(self):
-		return next(self.curentPlayersTurn)
+	def getPlayerTurn(self, arr):
+		return next(arr)
 
-	def wonGame(self, player):
-		return player.getSquare() == self.winningSquare
+	def wonGame(self, player, roll):
+		return player.getSquare().getNumber() + roll >= self.winningSquare.getNumber()
 
 	def endGame(self, player):
 		print("! ! !")
-		print("Congrats Player " + str(player) + ", you have won the game!")
+		print("Congrats Player " + player.getName() + ", you have won the game!")
 		print("! ! !")
 		self.gameOver = True
 		quit()
@@ -131,11 +135,16 @@ class Gameboard:
 			else:
 				print("Uh oh, dead end? Something is wrong.")
 
-		return 
+		return
+
+	def moveToSquare(self, player, roll):
+		return Gameboard.allSquares[player.getSquare().getNumber() + roll]
+
 	#Checks if the game has been won and if not allows a player to take his or her turn.
 	def play(self,str):
 		#print(str)
 		pygame.init() #initialize pygame
+		pygame.display.set_caption(self.gameName)
 	
 		background = pygame.image.load(self.board)
 		#get the width of the board
@@ -147,88 +156,80 @@ class Gameboard:
 		#get dice coordinates
 		y = Gameboard.allSquares[len(Gameboard.allSquares)-1].getCoords()
 		#get start coordinates
-		z = Gameboard.allSquares[0].getCoords()
+		z = Gameboard.allSquares[1].getCoords()
 		
 		running =True
 		all_sprites = pygame.sprite.Group()
 		mydice = d.dice(y[0],y[1])
-		p1 = pl.Player('test1',1,int(z[0])+10,int(z[1])+10)
-		p2 = pl.Player('test2',2,int(z[0])-10,int(z[1])-10)
-		p1.setSquare(Gameboard.allSquares[0])
-		p2.setSquare(Gameboard.allSquares[0])
-		
-		all_sprites.add(mydice)
-		all_sprites.add(p1)
-		all_sprites.add(p2)
-		turn = 1
-		currSq1 = 0
-		currSq2 = 0
-		winner = False
 
-	
-		#print(currSq1, "first currsq1")
-		#print(currSq2, "first currsq2")
-		#while not self.gameOver:
+
+		for i in range(len(self.list_names)):
+			pl_num = i
+			pl_name = "test {num}".format(num=pl_num)
+			if i == 0:
+				self.players.append(pl.Player(self.list_names[i], i, int(z[0]), int(z[0])))
+			elif i == 1:
+				self.players.append(pl.Player(self.list_names[i], i, int(z[0]), int(z[0]) + 30))
+			elif i == 2:
+				self.players.append(pl.Player(self.list_names[i], i, int(z[0]) - 40, int(z[0])))
+			elif i == 3:
+				self.players.append(pl.Player(self.list_names[i], i, int(z[0]) - 40, int(z[0]) + 30))
+
+			self.players[i].setSquare(self.getStartSquare())
+
+
+			all_sprites.add(self.players[i])
+
+		all_sprites.add(mydice)
+		turn = 0
+
+		winner = False
+		winner_num = 0
+        
+		finish_sq = self.getWinningSquare()
+
 		while running:
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
 					running = False
 				elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-					a = mydice.roll()
-					if (turn == 1 and winner == False):
-						currSq1 = currSq1 + a #!!!USE .next?
-						#print(currSq1, "currSq1")
-						if (currSq1 >= len(Gameboard.allSquares) - 2):
+					#roll the dice
+					dice_roll = mydice.roll()
+					#if a winner has not been declared yet
+					if not winner:
+						newxy = None
+						#if the player will land on a square with a sequence number equal to or beyond the finish square
+						if (self.wonGame(self.players[turn], dice_roll)):
+							#set winner to true
 							winner = True
+							winner_num = turn
 							#get the coordinates of the final square (finish square)
-							finalxy = Gameboard.allSquares[len(Gameboard.allSquares) - 2].getCoords()
-							#put player 1 on finish square
-							p1.onRoll(int(finalxy[0]),int(finalxy[1]))
-						else:                  
-							#get the Square you will be standing on
-							newSquare = Gameboard.allSquares[currSq1]
-
-							
-							#Reslove any special rules
-							token = newSquare.doSpecial()
+							newxy = self.getWinningSquare().getCoords()
+						
+						#if no player has reached finish square
+						else:
+							#set the player's square to the square they will land on
+							self.players[turn].setSquare(self.moveToSquare(self.players[turn], dice_roll))                  
+							#points to the square the player will move to
+							newSquare = self.players[turn].getSquare()
+							#Resolve any special rules
+							token = self.players[turn].getSquare().doSpecial()
 							if token != "resolved" and token:
-								#Only ladder case so far:(token is square #)
+								#the next square the player will move to is assigned here
 								newSquare = Gameboard.allSquares[token]
-								currSq1 = newSquare.getNumber()
-								#print(currSq1, "currSq1 Changed because landed on ladder")
-							#get the coordinates for the next square you need to go to
-							newxy = newSquare.getCoords()
-							#put player 1 on next square
-							p1.onRoll(int(newxy[0]),int(newxy[1]))
-							#then it becomes the next player's turn
-							turn = 2
-					elif (turn == 2 and winner == False):
-						currSq2 = currSq2 + a
-						#print(currSq2, "currSq2")
-						if( currSq2 >= len(Gameboard.allSquares) - 2):
-							winner = True
-							finalxy = Gameboard.allSquares[len(Gameboard.allSquares) - 2].getCoords()
-							p2.onRoll(int(finalxy[0]),int(finalxy[1]))
-						else:                  
-							#get the Square you will be standing on
-							newSquare = Gameboard.allSquares[currSq2]
+								self.players[turn].setSquare(newSquare)
 
-							
-							#Reslove any special rules
-							token = newSquare.doSpecial()
-							if token != "resolved" and token:
-								#Only ladder case so far:(token is square #)
-								newSquare = Gameboard.allSquares[token]
-								currSq2 = newSquare.getNumber()
-								#print(currSq2, "currSq2 Changed because landed on ladder")
-							#get the coordinates for the next square you need to go to
+							#get the coordinates for the  square you need to go to
 							newxy = newSquare.getCoords()
-							#put player 1 on next square
-							p2.onRoll(int(newxy[0]),int(newxy[1]))
-							#then it becomes the next player's turn
-							turn = 1      
+							
+						#put the player on the square they will be moved to
+						self.players[turn].onRoll(int(newxy[0]),int(newxy[1]))
+						#change to the next player's turn
+						turn = (turn + 1) % len(self.list_names)
+						
+			#if the winner is true, end the game
 			if winner:
-				self.endGame(turn)          
+				self.endGame(self.players[winner_num])          
 			                                  
 			                
 			all_sprites.update()

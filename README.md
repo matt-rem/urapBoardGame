@@ -12,7 +12,7 @@ This will open up the board game image in another window.
 
 The Terminal will prompt the user to enter the name of the game and the number of players who will be playing.
 
-Using your mouse, number the squares in the board game by left-clicking on the center of each square. Start from the "start" square and end at the "finish" square in the board game. By left-clicking the center of each square, the coordinates of each square will be saved.
+Using your mouse, number the squares in the board game by left-clicking on the top left corner of each square. Start from the "start" square and end at the "finish" square in the board game. By left-clicking the center of each square, the coordinates of each square will be saved.
 
 After the user left-clicks on the finish square, they must left-click on the board in order to add where the dice for the game will go (the last lieft-click will determine the position of the dice).
 

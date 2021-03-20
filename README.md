@@ -1,6 +1,6 @@
 # urapBoardGame
 
-This project is a board game engine. Users can use this project to customize their own board game with their own board game image file. The image file must be in the .png or .jpg format.
+This project is a board game engine in the python programming language. Users can use this project to customize their own board game with their own board game image file. The image file must be in the .png or .jpg format.
 
 To run this project the entire repository must be downloaded. The packages that need to be installed for this project are Pygame and OpenCV.
 
@@ -27,6 +27,8 @@ After typing in the number, the user will be prompted to enter in the second squ
 The same process is done for the snake paths in the game.
 
 The user can then press any key to exit this window.
+
+In the csv file, the labels "start" and "finish" must be typed into "type" column next to the first square, and the last square in the second to last row.
 
 ### Starting The Game
 

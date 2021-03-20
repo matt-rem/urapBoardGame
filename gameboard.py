@@ -167,13 +167,13 @@ class Gameboard:
 			pl_num = i
 			pl_name = "test {num}".format(num=pl_num)
 			if i == 0:
-				self.players.append(pl.Player(self.list_names[i], i, int(z[0]), int(z[0])))
+				self.players.append(pl.Player(self.list_names[i], i, int(z[0]), int(z[1])))
 			elif i == 1:
-				self.players.append(pl.Player(self.list_names[i], i, int(z[0]), int(z[0]) + 30))
+				self.players.append(pl.Player(self.list_names[i], i, int(z[0]), int(z[1]) + 30))
 			elif i == 2:
-				self.players.append(pl.Player(self.list_names[i], i, int(z[0]) - 40, int(z[0])))
+				self.players.append(pl.Player(self.list_names[i], i, int(z[0]) - 40, int(z[1])))
 			elif i == 3:
-				self.players.append(pl.Player(self.list_names[i], i, int(z[0]) - 40, int(z[0]) + 30))
+				self.players.append(pl.Player(self.list_names[i], i, int(z[0]) - 40, int(z[1]) + 30))
 
 			self.players[i].setSquare(self.getStartSquare())
 

@@ -2,6 +2,8 @@
 
 This project is a board game engine. Users can use this project to customize their own board game with their own board game image file. The image file must be in the .png or .jpg format.
 
+To run this project the entire repository must be downloaded. The packages that need to be installed for this project are Pygame and OpenCV.
+
 ### Marking The Squares
 
 To start labelling the squares to create the main path for the board game, open Terminal and run:
@@ -30,7 +32,7 @@ The user can then press any key to exit this window.
 
 To start the game after marking the squares, open Terminal and run:
 ```
-python3 main.py [your board game image file name here]
+python3 main.py [your board game image file name here] [names of the players, separated by commas]
 ```
 The user's board game should open up in another window, with the player images on the start square and the dice in the position that the user determined earlier.
 

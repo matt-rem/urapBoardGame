@@ -132,6 +132,7 @@ if __name__=="__main__":
             first = input("Enter number of the first square of the ladder or slide: ")
             second = input("Enter number of the second square of the ladder or slide: ")
             
+            #Sets the square's (first) special to ladder which takes in on eargument (second)
             for i in range(2, len(dataArray)):
                 #print(dataArray[i][4], first)
                 if int(dataArray[i][4]) == int(first):

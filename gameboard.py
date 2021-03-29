@@ -7,6 +7,8 @@ import itertools as it
 #from PIL import Image
 import math
 import pygame #used for GUI
+import os, subprocess, sys
+
 
 from numpy import genfromtxt
 
@@ -67,6 +69,7 @@ class Gameboard:
 					square = self.duplicateSquares.pop(j)
 					break
                         '''
+            #Updates special squares.
 			if data[i][6]:
 				if data[i][6] == "start":
 					self.startSquare = square
@@ -192,7 +195,7 @@ class Gameboard:
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
 					running = False
-				elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+				elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE: # Whats is pygame.KEYDOWN
 					#roll the dice
 					dice_roll = mydice.roll()
 					#if a winner has not been declared yet
@@ -226,7 +229,14 @@ class Gameboard:
 						self.players[turn].onRoll(int(newxy[0]),int(newxy[1]))
 						#change to the next player's turn
 						turn = (turn + 1) % len(self.list_names)
-						
+				#If the key pressed is R
+				elif event.type == pygame.KEYDOWN and event.key == 114:
+					with open('rules.txt') as f: 
+						opener = "open" if sys.platform == "darwin" else "xdg-open"
+						subprocess.call([opener, 'rules.txt'])
+						for line in f:
+							print(line.strip())
+
 			#if the winner is true, end the game
 			if winner:
 				self.endGame(self.players[winner_num])          
@@ -241,7 +251,6 @@ class Gameboard:
 			all_sprites.draw(screen)
 			pygame.display.update()
 			#player = self.getPlayerTurn()
-			#roll = 1 #PROMPT A ROLL!!!!!!!!!!!!!!!!!!! int(Math.random)*6 + 1 would make it play itself
 			#self.takeTurn(player, roll)
 
 		return

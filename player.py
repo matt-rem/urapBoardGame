@@ -12,13 +12,22 @@ class Player(pygame.sprite.Sprite):
                 self.square = None
                 self.playnum = playnum
                 self.image = Player.all_players[int(playnum)]
-                self.image = pygame.Surface((8,8))
+                self.image = pygame.Surface((50,50))
                 #self.image.fill((0,0,0))
                 self.rect = self.image.get_rect()
-                self.initx = x
-                self.inity = y
+
+
+                #SHIFTS to make image in center:
+                self.shiftx, self.shifty = self.image.get_size()
+                self.shiftx, self.shifty = self.shiftx / 2 , self.shifty / 2
+                #Piece x and y
+                self.initx = x - self.shiftx
+                self.inity = y - self.shifty
                 
-                self.rect.center = (x,y)
+                self.rect.center = (self.initx,self.inity)
+
+                #For currency
+                self.bal = 0
 
 
 
@@ -26,14 +35,16 @@ class Player(pygame.sprite.Sprite):
                 #self.is_winner = false
         def getName(self):
                 return self.player_name
+        def getBal(self):
+                return self.bal
         def getSquare(self):
                 return self.square
         def setSquare(self, sq):
                 self.square = sq
                 return
         def onRoll(self,x,y):
-                self.initx = x
-                self.inity = y
+                self.initx = x - self.shiftx
+                self.inity = y - self.shifty
                 #added
                 self.rect.center = (self.initx, self.inity)
 

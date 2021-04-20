@@ -36,6 +36,14 @@ class Square:
 	def doSpecial(self):
 		if self.special == "ladder":
 			return self.misc1
+		elif self.special == "forward":
+			return self.number + self.misc1
+		elif self.special == "back":
+			return self.number - self.misc1
+		elif self.special == "skip":
+			return "skip";
+		elif self.special == "reroll" or self.special == "roll again":
+			return "reroll"
 		else:
 			return "resolved"
 	'''wanted to add methods for snakes and ladders if the square is either the bottom of a ladder or the start of a snake, we can set

@@ -15,6 +15,7 @@ class Player(pygame.sprite.Sprite):
                 self.image = pygame.Surface((50,50))
                 #self.image.fill((0,0,0))
                 self.rect = self.image.get_rect()
+                self.skip = False
 
 
                 #SHIFTS to make image in center:
@@ -24,7 +25,7 @@ class Player(pygame.sprite.Sprite):
                 self.initx = x - self.shiftx
                 self.inity = y - self.shifty
                 
-                self.rect.center = (self.initx,self.inity)
+                self.rect.center = (self.initx, self.inity)
 
                 #For currency
                 self.bal = 0
@@ -42,6 +43,10 @@ class Player(pygame.sprite.Sprite):
         def setSquare(self, sq):
                 self.square = sq
                 return
+        def skip(self):
+                self.skip = not self.skip
+        def skipped(self):
+                return self.skip
         def onRoll(self,x,y):
                 self.initx = x - self.shiftx
                 self.inity = y - self.shifty

@@ -22,6 +22,9 @@ class Gameboard:
 	players = []
 
 	playerCount = None
+	bots = 0
+	maxPlayerCount = None
+
 	currentPlayersTurn = 0 #FOR NOW
 
 	allSquares = []
@@ -32,12 +35,10 @@ class Gameboard:
 	dicePosX = 0
 	dicePosY = 0
 	gameOver = False
+	list_names = []
 
-	def __init__(self, file, list_names):
+	def __init__(self, file):
 		self.board = file #IMG file for board
-		self.list_names = list_names.split(",")
-		self.list_names = sorted(self.list_names)
-		print(self.list_names)
 		self.setUp() #Sets up all Squares and players and puts players to starting squares.
 
 
@@ -55,7 +56,12 @@ class Gameboard:
 		self.gameName = data[1][0]
 		#print(self.gameName)
 		#self.printTable(data)
-		self.playerCount = int(data[1][1])
+		self.maxPlayerCount = int(data[1][1])
+		self.playerCount = int(input("Enter the number of players: "))
+		for i in range(self.playerCount):
+			self.list_names.append(input("Enter the name of player " + str(i + 1) + ": "))
+		print(self.list_names)
+		self.bots = int(input("Enter the number of computers you'd like to play with: "))
 		#print(self.playerCount)
 		#ignore last row
 		self.allSquares.append(None)
@@ -77,7 +83,18 @@ class Gameboard:
 					self.winningSquare = square
 				elif data[i][6] == "ladder":
 					square.misc1 = int(data[i][7])
+				elif data[i][6] == "forward":
+					square.misc1 = int(data[i][7])
+				elif data[i][6] == "back":
+					square.misc1 = int(data[i][7])
+				'''
+				elif data[i][6] == "skip":
+					square.misc1 = int(data[i][7])
+				elif data[i][6] == "go again" || data[i][6] == "reroll":
+					square.misc1 = int(data[i][7])
+				'''
 				square.special = data[i][6]
+
 			self.allSquares.append(square)
 
 			#Below is messed up but unused so whatever.
@@ -196,39 +213,58 @@ class Gameboard:
 				if event.type == pygame.QUIT:
 					running = False
 				elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE: # Whats is pygame.KEYDOWN
-					#roll the dice
-					dice_roll = mydice.roll()
+					
+					#Reroll Or No
+					reroll = False
+					
 					#if a winner has not been declared yet
 					if not winner:
 						newxy = None
-						#if the player will land on a square with a sequence number equal to or beyond the finish square
-						if (self.wonGame(self.players[turn], dice_roll)):
-							#set winner to true
-							winner = True
-							winner_num = turn
-							#get the coordinates of the final square (finish square)
-							newxy = self.getWinningSquare().getCoords()
 						
-						#if no player has reached finish square
+						#Skip a turn.
+						if self.players[turn].skipped():
+							self.players[turn].skip()
+							turn = (turn + 1) % len(self.list_names)
 						else:
-							#set the player's square to the square they will land on
-							self.players[turn].setSquare(self.moveToSquare(self.players[turn], dice_roll))                  
-							#points to the square the player will move to
-							newSquare = self.players[turn].getSquare()
-							#Resolve any special rules
-							token = self.players[turn].getSquare().doSpecial()
-							if token != "resolved" and token:
-								#the next square the player will move to is assigned here
-								newSquare = Gameboard.allSquares[token]
-								self.players[turn].setSquare(newSquare)
+							dice_roll = mydice.roll()
+							#if the player will land on a square with a sequence number equal to or beyond the finish square
+							if (self.wonGame(self.players[turn], dice_roll)):
+								#set winner to true
+								winner = True
+								winner_num = turn
+								#get the coordinates of the final square (finish square)
+								newxy = self.getWinningSquare().getCoords()
+							#if no player has reached finish square
+							else:
+								#roll the dice
+								dice_roll = mydice.roll()
+								#set the player's square to the square they will land on
+								self.players[turn].setSquare(self.moveToSquare(self.players[turn], dice_roll))                  
+								#points to the square the player will move to
+								newSquare = self.players[turn].getSquare()
+								#Resolve any special rules
+								token = self.players[turn].getSquare().doSpecial()
+								if token != "resolved" and token:
+									
+									#player attribute skip becomes true.
+									if token == "skip":
+										self.players[turn].skip()
+									#we don't update the turn counter
+									elif token == "reroll":
+										reroll = True
+									#the next square the player will move to is assigned here if there its a forward, backward, or ladder
+									else:
+										newSquare = Gameboard.allSquares[token]
+										self.players[turn].setSquare(newSquare)
 
-							#get the coordinates for the  square you need to go to
-							newxy = newSquare.getCoords()
+								#get the coordinates for the  square you need to go to
+								newxy = newSquare.getCoords()
 							
 						#put the player on the square they will be moved to
 						self.players[turn].onRoll(int(newxy[0]),int(newxy[1]))
-						#change to the next player's turn
-						turn = (turn + 1) % len(self.list_names)
+						#change to the next player's turn if no reroll
+						if not reroll:
+							turn = (turn + 1) % len(self.list_names)
 				#If the key pressed is R
 				elif event.type == pygame.KEYDOWN and event.key == 114:
 					with open('rules.txt') as f: 

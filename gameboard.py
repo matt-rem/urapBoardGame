@@ -3,18 +3,20 @@ import player as pl
 import numpy as np
 import dice as d
 import itertools as it
-#import GUI
-#from PIL import Image
+
 import math
-import pygame #used for GUI
+import pygame 
 import os, subprocess, sys
 
 
 from numpy import genfromtxt
 
 import csv
-#import position as pos
 
+MIN_VALUE_NEG = -1
+MIN_VALUE_ZERO = 0
+NUM_ROLL_TIMES = 15
+FIXED_TIME = 20
 
 class Gameboard:
 
@@ -24,7 +26,6 @@ class Gameboard:
 	playerCount = None
 	bots = 0
 	maxPlayerCount = None
-
 	currentPlayersTurn = 0 #FOR NOW
 
 	allSquares = []
@@ -32,14 +33,27 @@ class Gameboard:
 
 	winningSquare = None
 	startSquare = None
-	dicePosX = 0
-	dicePosY = 0
+	dicePosX = MIN_VALUE_ZERO
+	dicePosY = MIN_VALUE_ZERO
 	gameOver = False
 	list_names = []
 
-	def __init__(self, file):
+	def __init__(self, file, exact_roll):
 		self.board = file #IMG file for board
+		#self.list_names = list_names.split(",")
+		#self.list_names = sorted(self.list_names)
+
+
+
+		if (exact_roll == "true"):
+			self.exact_roll = True
+		else:
+			self.exact_roll = False
+
+		
 		self.setUp() #Sets up all Squares and players and puts players to starting squares.
+
+
 
 
 	def setUp(self):#Sets up all Squares and players and puts players to starting squares.
@@ -62,13 +76,28 @@ class Gameboard:
 			self.list_names.append(input("Enter the name of player " + str(i + 1) + ": "))
 		print(self.list_names)
 		self.bots = int(input("Enter the number of computers you'd like to play with: "))
+
+
+		'''if self.playerCount != len(self.list_names):
+			print("number of players and the number of player names you send must be the same!")
+			quit()
+		elif self.playerCount not in range(2, self.maxPlayerCount):
+			print("game must have between 2 to 4 players!")
+			quit()
+		elif len(self.list_names) not in range(2, self.maxPlayerCount):
+			print("you must provide between 2 to 4 player names!")
+			quit()'''
 		#print(self.playerCount)
 		#ignore last row
+
+
+		d_count = len(range(2, len(data)))-2
+		print("COUNT = ", d_count)
 		self.allSquares.append(None)
 		for i in range(2, len(data)): #Adds all the squares to allSquares, sets .nextquare, .special, and the x and y cooridantes properly. Also sets winningSquare and startSquare.
 
 			
-			square = sq.Square(data[i][2], data[i][3], data[i][4])
+			square = sq.Square(data[i][2], data[i][3], data[i][4], d_count)
 			# if there are duplicates squares maybe a square is missing and an exception should be thrown? 
 			'''for j in range(len(self.duplicateSquares)):
 				if self.duplicateSquares[j] == square:
@@ -83,41 +112,15 @@ class Gameboard:
 					self.winningSquare = square
 				elif data[i][6] == "ladder":
 					square.misc1 = int(data[i][7])
-				elif data[i][6] == "forward":
-					square.misc1 = int(data[i][7])
-				elif data[i][6] == "back":
-					square.misc1 = int(data[i][7])
-				'''
-				elif data[i][6] == "skip":
-					square.misc1 = int(data[i][7])
-				elif data[i][6] == "go again" || data[i][6] == "reroll":
-					square.misc1 = int(data[i][7])
-				'''
 				square.special = data[i][6]
-
 			self.allSquares.append(square)
 
 			#Below is messed up but unused so whatever.
+			d_count -= 1
 			if data[i][5]:
-				nextSquare = sq.Square(data[i][5], data[i][6], data[i][5])
+				nextSquare = sq.Square(data[i][5], data[i][6], data[i][5], d_count)
 				square.nextSquare = nextSquare
 				self.duplicateSquares.append(nextSquare)
-		'''a = len(data) -1		
-		global dicePosX
-		dicePosX = data[int(a)][2]
-		global dicePosY
-		dicePosY = data[int(a)][3]
-		print(dicePosX)
-		print(dicePosY)'''
-                                
-		#for i in range(self.playerCount): #Names each player and sets their square to the first square
-		#	name = "test" #PROMPT TO ENTER NAME!!!!!!!!!!!!!!!!!!!
-		#	p = pl.Player(name,i, 3 , 3)
-		#	p.setSquare(self.startSquare)
-		#	self.players.append(p)
-
-		#self.curentPlayersTurn = it.cycle(self.players)
-                
 
 
 
@@ -182,7 +185,7 @@ class Gameboard:
 		all_sprites = pygame.sprite.Group()
 		mydice = d.dice(y[0],y[1])
 
-
+		#add the players to the list
 		for i in range(len(self.list_names)):
 			pl_num = i
 			pl_name = "test {num}".format(num=pl_num)
@@ -191,9 +194,9 @@ class Gameboard:
 			elif i == 1:
 				self.players.append(pl.Player(self.list_names[i], i, int(z[0]), int(z[1]) + 30))
 			elif i == 2:
-				self.players.append(pl.Player(self.list_names[i], i, int(z[0]) - 40, int(z[1])))
+				self.players.append(pl.Player(self.list_names[i], i, int(z[0]) - 30, int(z[1])))
 			elif i == 3:
-				self.players.append(pl.Player(self.list_names[i], i, int(z[0]) - 40, int(z[1]) + 30))
+				self.players.append(pl.Player(self.list_names[i], i, int(z[0]) - 30, int(z[1]) + 30))
 
 			self.players[i].setSquare(self.getStartSquare())
 
@@ -201,70 +204,31 @@ class Gameboard:
 			all_sprites.add(self.players[i])
 
 		all_sprites.add(mydice)
-		turn = 0
+		turn = MIN_VALUE_ZERO
 
 		winner = False
-		winner_num = 0
-        
-		finish_sq = self.getWinningSquare()
+		winner_num = MIN_VALUE_ZERO
+
+		mydice.reset()
+		steps_to_move = MIN_VALUE_NEG
+
 
 		while running:
+			
+
+			clockobject = pygame.time.Clock()
+			clockobject.tick(FIXED_TIME)
+
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
 					running = False
-				elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE: # Whats is pygame.KEYDOWN
-					
+				elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
 					#Reroll Or No
 					reroll = False
-					
-					#if a winner has not been declared yet
-					if not winner:
-						newxy = None
-						
-						#Skip a turn.
-						if self.players[turn].skipped():
-							self.players[turn].skip()
-							turn = (turn + 1) % len(self.list_names)
-						else:
-							dice_roll = mydice.roll()
-							#if the player will land on a square with a sequence number equal to or beyond the finish square
-							if (self.wonGame(self.players[turn], dice_roll)):
-								#set winner to true
-								winner = True
-								winner_num = turn
-								#get the coordinates of the final square (finish square)
-								newxy = self.getWinningSquare().getCoords()
-							#if no player has reached finish square
-							else:
-								#roll the dice
-								dice_roll = mydice.roll()
-								#set the player's square to the square they will land on
-								self.players[turn].setSquare(self.moveToSquare(self.players[turn], dice_roll))                  
-								#points to the square the player will move to
-								newSquare = self.players[turn].getSquare()
-								#Resolve any special rules
-								token = self.players[turn].getSquare().doSpecial()
-								if token != "resolved" and token:
-									
-									#player attribute skip becomes true.
-									if token == "skip":
-										self.players[turn].skip()
-									#we don't update the turn counter
-									elif token == "reroll":
-										reroll = True
-									#the next square the player will move to is assigned here if there its a forward, backward, or ladder
-									else:
-										newSquare = Gameboard.allSquares[token]
-										self.players[turn].setSquare(newSquare)
+					#roll_times = NUM_ROLL_TIMES
+					mydice.setNumRolls(15)
 
-								#get the coordinates for the  square you need to go to
-								newxy = newSquare.getCoords()
-							
-						#put the player on the square they will be moved to
-						self.players[turn].onRoll(int(newxy[0]),int(newxy[1]))
-						#change to the next player's turn if no reroll
-						if not reroll:
-							turn = (turn + 1) % len(self.list_names)
+					
 				#If the key pressed is R
 				elif event.type == pygame.KEYDOWN and event.key == 114:
 					with open('rules.txt') as f: 
@@ -272,10 +236,91 @@ class Gameboard:
 						subprocess.call([opener, 'rules.txt'])
 						for line in f:
 							print(line.strip())
+					
 
-			#if the winner is true, end the game
-			if winner:
-				self.endGame(self.players[winner_num])          
+			#if roll_times has been set to 15 (if the dice has not been rolled yet)
+			if mydice.getNumRolls() > 0:
+					#roll the dice and save the value
+					steps_to_move = mydice.roll()
+					#decrease roll times
+					mydice.decrement()
+
+			#if roll times has gone down to 0 (if the dice has been rolled)
+			else:
+				#reset the values
+				mydice.reset()
+
+
+				#if this player's turn needs to be skipped
+				if self.players[turn].skipped():
+					self.players[turn].skip_turn()
+					turn = (turn + 1) % len(self.list_names)
+
+				#if the player can make a valid move
+				elif steps_to_move <= self.players[turn].getSquare().getDist() and steps_to_move > 0:
+					#set the player's square to the very next square (this move will be repeated dice roll number of times)
+					self.players[turn].setSquare(self.moveToSquare(self.players[turn], 1))
+					slidexy = self.players[turn].getSquare().getCoords()
+
+					self.players[turn].setOffset(turn)
+
+					self.players[turn].onRoll(int(slidexy[0]) + self.players[turn].getXOffset(),int(slidexy[1]) + self.players[turn].getYOffset())
+
+					#decrease dice_roll till the player lands on the square they need to land on
+					steps_to_move -= 1
+
+				#if you have moved to a special square/ are done moving
+				elif steps_to_move == 0:
+					#check to see if player has landed on special square
+					token = self.players[turn].getSquare().doSpecial()
+					if token != "resolved" and token:
+
+						#player attribute skip becomes true.
+						if token == "skip":
+							print("skipping for player ", turn)
+							self.players[turn].skip_turn()
+
+						#we don't update the turn counter
+						elif token == "reroll":
+							print("rolling again for player ", turn)
+							reroll = True
+						else:
+							print("ladder for player ", turn)
+							jumpSquare = Gameboard.allSquares[token]
+							self.players[turn].setSquare(jumpSquare)
+							jumpxy = jumpSquare.getCoords()
+							self.players[turn].setOffset(turn)
+							self.players[turn].onRoll(int(jumpxy[0]) + self.players[turn].getXOffset(),int(jumpxy[1]) + self.players[turn].getYOffset())
+					steps_to_move = MIN_VALUE_NEG
+
+					#before we switch turns: check if the game is over
+					if self.players[turn].getSquare() == self.getWinningSquare():
+						self.endGame(self.players[turn])
+
+					#if this player is not on a reroll square
+					if not reroll:
+						turn = (turn + 1) % len(self.list_names)
+					#turn = (turn + 1) % len(self.list_names)
+
+				
+				#If you roll more than needed to get to the winning square, and need an exact roll
+				elif steps_to_move > self.players[turn].getSquare().getDist() and steps_to_move > 0 and self.exact_roll:
+					print("exact roll = ", self.exact_roll)
+
+					steps_to_move = MIN_VALUE_NEG
+					print("oops you cant move player", turn ,"!")
+					turn = (turn + 1) % len(self.list_names)
+
+				#If you roll more than needed to get to the winning square, but do not need an exact roll
+				elif steps_to_move > self.players[turn].getSquare().getDist() and steps_to_move > 0 and not self.exact_roll:
+					print("not exact roll")
+					self.endGame(self.players[turn])
+
+
+					
+			#if winner:
+				#self.endGame(self.players[winner_num])  
+
 			                                  
 			                
 			all_sprites.update()
@@ -284,6 +329,7 @@ class Gameboard:
 			#all_sprites.draw(screen)
 
 			screen.blit(background,(0,0))
+
 			all_sprites.draw(screen)
 			pygame.display.update()
 			#player = self.getPlayerTurn()

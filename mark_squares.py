@@ -22,7 +22,7 @@ dataArray = []
 
 name = input("Enter the name of the game: ")
 playercount = input("Enter the maximum number of players: ")
-dataArray.append(['Game Name','Max Player Count','x coordinate', 'y coordinate', 'Square Number','Next Square Number', 'type', 'misc1', 'misc2'])
+dataArray.append(['Game Name','Player Count','x coordinate', 'y coordinate', 'Square Number','Next Square Number', 'type', 'misc1', 'misc2'])
 dataArray.append([name, playercount,'', '', '', '', '', '', ''])
 #click to display the square position, as well as the x, y coordinate of mouse click (preferrably the user should
 #click in the center of the square on the board)
@@ -30,8 +30,8 @@ def click_event(event, x, y, flags, params):
     global sq_num;
       # checking for left mouse clicks 
     global undoCount;
-    #if event != 0:
-        #print(event, "going in")
+    if event != 0:
+        print(event, "going in")
     if event == cv2.EVENT_LBUTTONDOWN: 
   
         # displaying the coordinates 
@@ -54,7 +54,7 @@ def click_event(event, x, y, flags, params):
                         0.5, (0, 0, 0), 2) 
         else:
             #on the image show the square position number's x, y coordinate
-            #print("UNDO")
+            print("UNDO")
             cv2.putText(img,str(sq_num), (x,y), font, 
                         0.5, (255, 0, 0), 2)   
             undoCount -= 1
@@ -94,10 +94,9 @@ if __name__=="__main__":
     running = True
     while running:
         k = cv2.waitKey(0);
-        #print(k)
         #Press escape for exit from program
         if k == 27:
-            #print(dataArray)
+            print(dataArray)
             #Delete old csv file
             f = open("sample.csv", "w")
             f.truncate()

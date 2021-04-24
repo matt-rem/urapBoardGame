@@ -10,12 +10,16 @@ class Square:
 	nextSquare = None
 	number = None
 
+	dist = -1
+
 	#added
 	occupied = False
 
-	def __init__(self, x, y, number):
+	def __init__(self, x, y, number, d):
 		self.position = x, y
 		self.number = int(number)
+		self.dist = d
+
 
 	def getCoords(self):
 		return self.position
@@ -46,13 +50,12 @@ class Square:
 			return "reroll"
 		else:
 			return "resolved"
-	'''wanted to add methods for snakes and ladders if the square is either the bottom of a ladder or the start of a snake, we can set
-	the position of the square the player will eventually land on. 
 	
-	def set_successor(self, s):
-		self.successor.x = s.x
-		self.successor.y = s.y
-	
-	'''
+	#returns the distance between the player and the winning square
+	def getDist(self):
+		return self.dist
+
+	def setDist(self, x):
+		self.dist = x
 	
 	

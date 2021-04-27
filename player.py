@@ -35,6 +35,9 @@ class Player(pygame.sprite.Sprite):
                 #For currency
                 self.bal = 0
 
+                #For Bot
+                self.bot = False
+
 
         #returns player's name
         def getName(self):
@@ -89,6 +92,12 @@ class Player(pygame.sprite.Sprite):
         def skipped(self):
                 return self.skip
 
+        #Sets player to a bot
+        def setBot(self):
+                self.bot = True
+        #Player is bot?
+        def isBot(self):
+                return self.bot
 
         #update the player image
         def update(self):

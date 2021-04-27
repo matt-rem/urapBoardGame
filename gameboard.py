@@ -11,6 +11,9 @@ import os, subprocess, sys
 
 from numpy import genfromtxt
 
+from playsound import playsound
+#WAV OR MP3 FILES ONLY
+
 import csv
 
 MIN_VALUE_NEG = -1
@@ -74,9 +77,9 @@ class Gameboard:
 		self.playerCount = int(input("Enter the number of players: "))
 		for i in range(self.playerCount):
 			self.list_names.append(input("Enter the name of player " + str(i + 1) + ": "))
-		print(self.list_names)
 		self.bots = int(input("Enter the number of computers you'd like to play with: "))
-
+		for i in range(self.bots):
+			self.list_names.append("Computer Bot " + str(i + 1))
 
 		'''if self.playerCount != len(self.list_names):
 			print("number of players and the number of player names you send must be the same!")
@@ -190,13 +193,29 @@ class Gameboard:
 			pl_num = i
 			pl_name = "test {num}".format(num=pl_num)
 			if i == 0:
-				self.players.append(pl.Player(self.list_names[i], i, int(z[0]), int(z[1])))
+				a = pl.Player(self.list_names[i], i, int(z[0]), int(z[1]))
+				if a.getName()[0:8] == "Computer":
+					a.setBot()
+
+				self.players.append(a)
 			elif i == 1:
-				self.players.append(pl.Player(self.list_names[i], i, int(z[0]), int(z[1]) + 30))
+				a = pl.Player(self.list_names[i], i, int(z[0]), int(z[1]))
+				if a.getName()[0:8] == "Computer":
+					a.setBot()
+
+				self.players.append(a)
 			elif i == 2:
-				self.players.append(pl.Player(self.list_names[i], i, int(z[0]) - 30, int(z[1])))
+				a = pl.Player(self.list_names[i], i, int(z[0]), int(z[1]))
+				if a.getName()[0:8] == "Computer":
+					a.setBot()
+
+				self.players.append(a)
 			elif i == 3:
-				self.players.append(pl.Player(self.list_names[i], i, int(z[0]) - 30, int(z[1]) + 30))
+				a = pl.Player(self.list_names[i], i, int(z[0]), int(z[1]))
+				if a.getName()[0:8] == "Computer":
+					a.setBot()
+
+				self.players.append(a)
 
 			self.players[i].setSquare(self.getStartSquare())
 
@@ -249,6 +268,9 @@ class Gameboard:
 			else:
 				#reset the values
 				mydice.reset()
+
+				if self.player.isBot():
+					#Roll for the player. FIXME
 
 
 				#if this player's turn needs to be skipped

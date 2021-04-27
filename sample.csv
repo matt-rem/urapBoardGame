@@ -1,7 +1,9 @@
-Game Name,Max Player Count,x coordinate,y coordinate,Square Number,Next Square Number,type,misc1,misc2
-4,4,,,,,,,
-,,118,159,1,2,start,,
-,,192,159,2,3,,,
-,,270,157,3,4,,,
-,,367,154,4,5,finish,,
-,,501,336,5,6,dice,,
+Game Name,Player Count,x coordinate,y coordinate,Square Number,Next Square Number,type,misc1,misc2
+s,4,,,,,,,
+,,38,36,1,2,start,,
+,,114,32,2,3,,,
+,,154,36,3,4,,,
+,,198,35,4,5,,,
+,,225,35,5,6,,,
+,,204,128,6,7,finish,,
+,,307,27,7,8,dice,,

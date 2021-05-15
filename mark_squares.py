@@ -22,8 +22,8 @@ dataArray = []
 
 name = input("Enter the name of the game: ")
 playercount = input("Enter the maximum number of players: ")
-dataArray.append(['Game Name','Player Count','x coordinate', 'y coordinate', 'Square Number','Next Square Number', 'type', 'misc1', 'misc2'])
-dataArray.append([name, playercount,'', '', '', '', '', '', ''])
+dataArray.append(['Game Name','Player Count','x coordinate', 'y coordinate', 'Square Number','Next Square Number', 'type', 'misc1', 'misc2', 'sound'])
+dataArray.append([name, playercount,'', '', '', '', '', '', '', ''])
 #click to display the square position, as well as the x, y coordinate of mouse click (preferrably the user should
 #click in the center of the square on the board)
 def click_event(event, x, y, flags, params): 
@@ -46,7 +46,7 @@ def click_event(event, x, y, flags, params):
            f_writer = csv.writer(sfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
            f_writer.writerow(['','',x, y, sq_num, sq_num + 1,'','', ''])
         '''
-        dataArray.append(['','', x, y, sq_num, sq_num + 1,'','', ''])
+        dataArray.append(['','', x, y, sq_num, sq_num + 1,'','', '', ''])
 
         if undoCount == 0:
             #on the image show the square position number's x, y coordinate

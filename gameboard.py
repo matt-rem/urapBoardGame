@@ -11,7 +11,7 @@ import os, subprocess, sys
 
 from numpy import genfromtxt
 
-from playsound import playsound
+#from playsound import playsound
 #WAV OR MP3 FILES ONLY
 
 import csv
@@ -113,9 +113,27 @@ class Gameboard:
 					self.startSquare = square
 				elif data[i][6] == "finish":
 					self.winningSquare = square
+					if not data[i][9]:
+						square.sound = "win.wav"
+					else:
+						square.sound = data[i][9]
 				elif data[i][6] == "ladder":
 					square.misc1 = int(data[i][7])
+					if not data[i][9]:
+						if int(data[i][7]) > int(data[i][4]):
+							square.sound = "ladder.wav"
+						else:
+							square.sound = "slide.wav"
+					else:
+						square.sound = data[i][9]
 				square.special = data[i][6]
+			
+			if not square.hasSound():
+				if not data[i][9]:
+					square.sound = "move.wav"
+				else:
+					square.sound = data[i][9]
+
 			self.allSquares.append(square)
 
 			#Below is messed up but unused so whatever.
@@ -144,6 +162,7 @@ class Gameboard:
 		print("Congrats Player " + player.getName() + ", you have won the game!")
 		print("! ! !")
 		self.gameOver = True
+		pygame.time.wait(5000)
 		quit()
 
 		return #TERMINATE THE GAME!
@@ -167,10 +186,13 @@ class Gameboard:
 		return Gameboard.allSquares[player.getSquare().getNumber() + roll]
 
 	#Checks if the game has been won and if not allows a player to take his or her turn.
-	def play(self,str):
+	def play(self, str):
 		#print(str)
-		pygame.init() #initialize pygame
+		pygame.init()
+		pygame.font.init()
+		pygame.mixer.init() #initialize pygame
 		pygame.display.set_caption(self.gameName)
+
 	
 		background = pygame.image.load(self.board)
 		#get the width of the board
@@ -230,7 +252,7 @@ class Gameboard:
 
 		mydice.reset()
 		steps_to_move = MIN_VALUE_NEG
-
+		rollForBot = True
 
 		while running:
 			
@@ -238,41 +260,23 @@ class Gameboard:
 			clockobject = pygame.time.Clock()
 			clockobject.tick(FIXED_TIME)
 
-			for event in pygame.event.get():
-				if event.type == pygame.QUIT:
-					running = False
-				elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-					#Reroll Or No
-					reroll = False
-					#roll_times = NUM_ROLL_TIMES
+				#Roll for the player. FIXME!
+			if self.players[turn].isBot():
+				reroll = False
+				
+				#roll_times = NUM_ROLL_TIMES
+				if rollForBot:
 					mydice.setNumRolls(15)
-
-					
-				#If the key pressed is R
-				elif event.type == pygame.KEYDOWN and event.key == 114:
-					with open('rules.txt') as f: 
-						opener = "open" if sys.platform == "darwin" else "xdg-open"
-						subprocess.call([opener, 'rules.txt'])
-						for line in f:
-							print(line.strip())
-					
-
-			#if roll_times has been set to 15 (if the dice has not been rolled yet)
-			if mydice.getNumRolls() > 0:
+					rollForBot = False
+				
+				while mydice.getNumRolls() > 0:
 					#roll the dice and save the value
 					steps_to_move = mydice.roll()
 					#decrease roll times
 					mydice.decrement()
-
-			#if roll times has gone down to 0 (if the dice has been rolled)
-			else:
 				#reset the values
 				mydice.reset()
-
-				if self.player.isBot():
-					#Roll for the player. FIXME
-
-
+				print("go")
 				#if this player's turn needs to be skipped
 				if self.players[turn].skipped():
 					self.players[turn].skip_turn()
@@ -288,11 +292,20 @@ class Gameboard:
 
 					self.players[turn].onRoll(int(slidexy[0]) + self.players[turn].getXOffset(),int(slidexy[1]) + self.players[turn].getYOffset())
 
+					#play sound of sq
+					sound = pygame.mixer.Sound(os.path.join('sound', self.players[turn].getSquare().getSound()))
+					pygame.mixer.Sound.play(sound)
+
+
+
 					#decrease dice_roll till the player lands on the square they need to land on
 					steps_to_move -= 1
 
 				#if you have moved to a special square/ are done moving
-				elif steps_to_move == 0:
+				print(steps_to_move)
+				if steps_to_move == 0:
+					sound = pygame.mixer.Sound(os.path.join('sound', self.players[turn].getSquare().getSound()))
+					pygame.mixer.Sound.play(sound)
 					#check to see if player has landed on special square
 					token = self.players[turn].getSquare().doSpecial()
 					if token != "resolved" and token:
@@ -315,6 +328,7 @@ class Gameboard:
 							self.players[turn].onRoll(int(jumpxy[0]) + self.players[turn].getXOffset(),int(jumpxy[1]) + self.players[turn].getYOffset())
 					steps_to_move = MIN_VALUE_NEG
 
+
 					#before we switch turns: check if the game is over
 					if self.players[turn].getSquare() == self.getWinningSquare():
 						self.endGame(self.players[turn])
@@ -322,6 +336,7 @@ class Gameboard:
 					#if this player is not on a reroll square
 					if not reroll:
 						turn = (turn + 1) % len(self.list_names)
+					rollForBot = True
 					#turn = (turn + 1) % len(self.list_names)
 
 				
@@ -336,7 +351,114 @@ class Gameboard:
 				#If you roll more than needed to get to the winning square, but do not need an exact roll
 				elif steps_to_move > self.players[turn].getSquare().getDist() and steps_to_move > 0 and not self.exact_roll:
 					print("not exact roll")
+					sound = pygame.mixer.Sound(os.path.join('sound', self.winningSquare.getSound()))
+					pygame.mixer.Sound.play(sound)
 					self.endGame(self.players[turn])
+			else:		
+				for event in pygame.event.get():
+					if event.type == pygame.QUIT:
+						running = False
+					elif self.players[turn].isBot() or event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+						#Reroll Or No
+						reroll = False
+						#roll_times = NUM_ROLL_TIMES
+						mydice.setNumRolls(15)
+
+						
+					#If the key pressed is R
+					elif event.type == pygame.KEYDOWN and event.key == 114:
+						with open('rules.txt') as f: 
+							opener = "open" if sys.platform == "darwin" else "xdg-open"
+							subprocess.call([opener, 'rules.txt'])
+							for line in f:
+								print(line.strip())
+						
+
+				#if roll_times has been set to 15 (if the dice has not been rolled yet)
+				if mydice.getNumRolls() > 0:
+						#roll the dice and save the value
+						steps_to_move = mydice.roll()
+						#decrease roll times
+						mydice.decrement()
+
+				#if roll times has gone down to 0 (if the dice has been rolled)
+				else:
+					#reset the values
+					mydice.reset()
+					#if this player's turn needs to be skipped
+					if self.players[turn].skipped():
+						self.players[turn].skip_turn()
+						turn = (turn + 1) % len(self.list_names)
+
+					#if the player can make a valid move
+					elif steps_to_move <= self.players[turn].getSquare().getDist() and steps_to_move > 0:
+						#set the player's square to the very next square (this move will be repeated dice roll number of times)
+						self.players[turn].setSquare(self.moveToSquare(self.players[turn], 1))
+						slidexy = self.players[turn].getSquare().getCoords()
+
+						self.players[turn].setOffset(turn)
+
+						self.players[turn].onRoll(int(slidexy[0]) + self.players[turn].getXOffset(),int(slidexy[1]) + self.players[turn].getYOffset())
+
+						#decrease dice_roll till the player lands on the square they need to land on
+						steps_to_move -= 1
+						sound = pygame.mixer.Sound(os.path.join('sound', self.players[turn].getSquare().getSound()))
+						pygame.mixer.Sound.play(sound)
+
+					#if you have moved to a special square/ are done moving
+					elif steps_to_move == 0:
+						print(self.players[turn].getSquare().getSound())
+						print(self.players[turn].getSquare().getNumber())
+						print(self.winningSquare.getNumber())
+						sound = pygame.mixer.Sound(os.path.join('sound', self.players[turn].getSquare().getSound()))
+						pygame.mixer.Sound.play(sound)
+
+						#check to see if player has landed on special square
+						token = self.players[turn].getSquare().doSpecial()
+						if token != "resolved" and token:
+
+							#player attribute skip becomes true.
+							if token == "skip":
+								print("skipping for player ", turn)
+								self.players[turn].skip_turn()
+
+							#we don't update the turn counter
+							elif token == "reroll":
+								print("rolling again for player ", turn)
+								reroll = True
+							else:
+								print("ladder for player ", turn)
+								jumpSquare = Gameboard.allSquares[token]
+								self.players[turn].setSquare(jumpSquare)
+								jumpxy = jumpSquare.getCoords()
+								self.players[turn].setOffset(turn)
+								self.players[turn].onRoll(int(jumpxy[0]) + self.players[turn].getXOffset(),int(jumpxy[1]) + self.players[turn].getYOffset())
+						steps_to_move = MIN_VALUE_NEG
+
+						#before we switch turns: check if the game is over
+						if self.players[turn].getSquare() == self.getWinningSquare():
+							self.endGame(self.players[turn])
+
+						#if this player is not on a reroll square
+						if not reroll:
+							turn = (turn + 1) % len(self.list_names)
+						#turn = (turn + 1) % len(self.list_names)
+
+					
+					#If you roll more than needed to get to the winning square, and need an exact roll
+					elif steps_to_move > self.players[turn].getSquare().getDist() and steps_to_move > 0 and self.exact_roll:
+						print("exact roll = ", self.exact_roll)
+
+						steps_to_move = MIN_VALUE_NEG
+						print("oops you cant move player", turn ,"!")
+						turn = (turn + 1) % len(self.list_names)
+
+					#If you roll more than needed to get to the winning square, but do not need an exact roll
+					elif steps_to_move > self.players[turn].getSquare().getDist() and steps_to_move > 0 and not self.exact_roll:
+						print("not exact roll")
+						sound = pygame.mixer.Sound(os.path.join('sound', self.winningSquare.getSound()))
+						pygame.mixer.Sound.play(sound)
+						self.endGame(self.players[turn])
 
 
 					

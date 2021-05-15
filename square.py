@@ -9,6 +9,7 @@ class Square:
 	misc2 = None
 	nextSquare = None
 	number = None
+	sound = 0
 
 	dist = -1
 
@@ -20,6 +21,10 @@ class Square:
 		self.number = int(number)
 		self.dist = d
 
+	def hasSound(self):
+		return self.sound != 0
+	def getSound(self):
+		return self.sound
 
 	def getCoords(self):
 		return self.position

@@ -123,7 +123,7 @@ class Gameboard:
 						if int(data[i][7]) > int(data[i][4]):
 							square.sound = "ladder.wav"
 						else:
-							square.sound = "slide.wav"
+							square.sound = "slidedown.wav"
 					else:
 						square.sound = data[i][9]
 				square.special = data[i][6]
@@ -162,7 +162,7 @@ class Gameboard:
 		print("Congrats Player " + player.getName() + ", you have won the game!")
 		print("! ! !")
 		self.gameOver = True
-		pygame.time.wait(5000)
+		pygame.time.wait(3000)
 		quit()
 
 		return #TERMINATE THE GAME!
@@ -255,19 +255,19 @@ class Gameboard:
 		rollForBot = True
 
 		while running:
-			
-
 			clockobject = pygame.time.Clock()
 			clockobject.tick(FIXED_TIME)
 
 				#Roll for the player. FIXME!
 			if self.players[turn].isBot():
 				reroll = False
+
 				
 				#roll_times = NUM_ROLL_TIMES
 				if rollForBot:
 					mydice.setNumRolls(15)
 					rollForBot = False
+					pygame.time.wait(1000)
 				
 				while mydice.getNumRolls() > 0:
 					#roll the dice and save the value
@@ -284,6 +284,7 @@ class Gameboard:
 
 				#if the player can make a valid move
 				elif steps_to_move <= self.players[turn].getSquare().getDist() and steps_to_move > 0:
+					pygame.time.wait(125)
 					#set the player's square to the very next square (this move will be repeated dice roll number of times)
 					self.players[turn].setSquare(self.moveToSquare(self.players[turn], 1))
 					slidexy = self.players[turn].getSquare().getCoords()
@@ -291,19 +292,18 @@ class Gameboard:
 					self.players[turn].setOffset(turn)
 
 					self.players[turn].onRoll(int(slidexy[0]) + self.players[turn].getXOffset(),int(slidexy[1]) + self.players[turn].getYOffset())
-
-					#play sound of sq
-					sound = pygame.mixer.Sound(os.path.join('sound', self.players[turn].getSquare().getSound()))
-					pygame.mixer.Sound.play(sound)
-
-
-
 					#decrease dice_roll till the player lands on the square they need to land on
 					steps_to_move -= 1
+					if steps_to_move != 0:
+						print("Made sound 4")
+						#play sound of sq
+						sound = pygame.mixer.Sound(os.path.join('sound', self.players[turn].getSquare().getSound()))
+						pygame.mixer.Sound.play(sound)
 
 				#if you have moved to a special square/ are done moving
 				print(steps_to_move)
 				if steps_to_move == 0:
+					print("Made sound 5")
 					sound = pygame.mixer.Sound(os.path.join('sound', self.players[turn].getSquare().getSound()))
 					pygame.mixer.Sound.play(sound)
 					#check to see if player has landed on special square
@@ -351,6 +351,7 @@ class Gameboard:
 				#If you roll more than needed to get to the winning square, but do not need an exact roll
 				elif steps_to_move > self.players[turn].getSquare().getDist() and steps_to_move > 0 and not self.exact_roll:
 					print("not exact roll")
+					print("Made sound 6")
 					sound = pygame.mixer.Sound(os.path.join('sound', self.winningSquare.getSound()))
 					pygame.mixer.Sound.play(sound)
 					self.endGame(self.players[turn])
@@ -392,6 +393,7 @@ class Gameboard:
 
 					#if the player can make a valid move
 					elif steps_to_move <= self.players[turn].getSquare().getDist() and steps_to_move > 0:
+						pygame.time.wait(125)
 						#set the player's square to the very next square (this move will be repeated dice roll number of times)
 						self.players[turn].setSquare(self.moveToSquare(self.players[turn], 1))
 						slidexy = self.players[turn].getSquare().getCoords()
@@ -402,14 +404,17 @@ class Gameboard:
 
 						#decrease dice_roll till the player lands on the square they need to land on
 						steps_to_move -= 1
-						sound = pygame.mixer.Sound(os.path.join('sound', self.players[turn].getSquare().getSound()))
-						pygame.mixer.Sound.play(sound)
+						if steps_to_move != 0:
+							print("Made sound 1")
+							sound = pygame.mixer.Sound(os.path.join('sound', self.players[turn].getSquare().getSound()))
+							pygame.mixer.Sound.play(sound)
 
 					#if you have moved to a special square/ are done moving
 					elif steps_to_move == 0:
 						print(self.players[turn].getSquare().getSound())
 						print(self.players[turn].getSquare().getNumber())
 						print(self.winningSquare.getNumber())
+						print("Made sound 2")
 						sound = pygame.mixer.Sound(os.path.join('sound', self.players[turn].getSquare().getSound()))
 						pygame.mixer.Sound.play(sound)
 
@@ -456,6 +461,7 @@ class Gameboard:
 					#If you roll more than needed to get to the winning square, but do not need an exact roll
 					elif steps_to_move > self.players[turn].getSquare().getDist() and steps_to_move > 0 and not self.exact_roll:
 						print("not exact roll")
+						print("Made sound 3")
 						sound = pygame.mixer.Sound(os.path.join('sound', self.winningSquare.getSound()))
 						pygame.mixer.Sound.play(sound)
 						self.endGame(self.players[turn])

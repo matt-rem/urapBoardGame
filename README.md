@@ -4,8 +4,6 @@ This project is a board game engine in the python programming language. Users ca
 
 To run this project the entire repository must be downloaded. The packages that need to be installed for this project are Pygame and OpenCV.
 
-This project currently supports 
-
 ### Marking The Squares
 
 To start labelling the squares to create the main path for the board game, open Terminal and run:

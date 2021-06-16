@@ -1,6 +1,9 @@
 import pygame
 
+
+#This class creates player instances that will correspond to the pieces that move across the board when the game is played.
 class Player(pygame.sprite.Sprite):
+        #the images for the default four tokens
         green = pygame.image.load("green_piece.png")
         blue  = pygame.image.load("blue_piece.png")
         orange = pygame.image.load("orange_piece.png")
@@ -91,6 +94,7 @@ class Player(pygame.sprite.Sprite):
         #return whether the player's turn has been skipped
         def skipped(self):
                 return self.skip
+
 
         #Sets player to a bot
         def setBot(self):

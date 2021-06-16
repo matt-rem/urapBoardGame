@@ -9,21 +9,12 @@ import sys
 sq_num = 1
 undoCount = 0
 
-#first time opens a csv file (the csv file must already exist)
-'''
-with open('sample.csv', mode='w') as sfile:
-    f_writer = csv.writer(sfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-    f_writer.writerow(['Game Name','Player Count','x coordinate', 'y coordinate', 'type','next square', 'next x ','next y'])
-    name = input("Enter the name of the game: ")
-    playercount = input("Enter the number of players: ")
-    f_writer.writerow([name, playercount,'', '', '','', '','', ''])
-'''
 dataArray = []
 
 name = input("Enter the name of the game: ")
 playercount = input("Enter the maximum number of players: ")
-dataArray.append(['Game Name','Player Count','x coordinate', 'y coordinate', 'Square Number','Next Square Number', 'type', 'misc1', 'misc2', 'sound'])
-dataArray.append([name, playercount,'', '', '', '', '', '', '', ''])
+dataArray.append(['Game Name','Player Count','x coordinate', 'y coordinate', 'Square Number','Next Square Number', 'type', 'misc1', 'misc2','sound'])
+dataArray.append([name, playercount,'', '', '', '', '', '', ''])
 #click to display the square position, as well as the x, y coordinate of mouse click (preferrably the user should
 #click in the center of the square on the board)
 def click_event(event, x, y, flags, params): 
@@ -37,16 +28,8 @@ def click_event(event, x, y, flags, params):
         # displaying the coordinates 
         # on the image window 
         font = cv2.FONT_HERSHEY_SIMPLEX
-        
-       
-        #append to already open csv file
-        #write x, y of mouse click, square position, next square gets square position +1
-        '''
-        with open('sample.csv', mode='a') as sfile:
-           f_writer = csv.writer(sfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-           f_writer.writerow(['','',x, y, sq_num, sq_num + 1,'','', ''])
-        '''
-        dataArray.append(['','', x, y, sq_num, sq_num + 1,'','', '', ''])
+
+        dataArray.append(['','', x, y, sq_num, sq_num + 1,'','', '',''])
 
         if undoCount == 0:
             #on the image show the square position number's x, y coordinate
@@ -127,7 +110,6 @@ if __name__=="__main__":
         if k == 108: 
             # displaying the coordinates 
             # on the image window 
-            #print(dataArray)
             first = input("Enter number of the first square of the ladder or slide: ")
             second = input("Enter number of the second square of the ladder or slide: ")
             

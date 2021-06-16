@@ -38,7 +38,7 @@ After pressing "enter", the next prompt will ask for the maximum number of playe
 
 Hitting enter again will open up the board game image in another window.
 
-Using your mouse or laptop touchpad, number the squares in the board game by clicking in the center of each square. Start from the "start" square and end at the "finish" square in the board game. By clicking the center of each square, the coordinates of each square will be saved.
+Using your mouse or laptop touchpad, number the squares in the board game by clicking in the center of each square. Go in numerical order and start from the "start" square and end at the "finish" square in the board game and. By clicking the center of each square, the coordinates of each square will be saved.
 
 After the user clicks on the finish square, they must click on the board in order to add where the dice for the game will go (the last click on the board will determine the position of the dice).
 

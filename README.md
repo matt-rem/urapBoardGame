@@ -69,6 +69,3 @@ Copy the link (in this case http://127.0.0.1:5000/) into your browser. By defaul
 
 
 
-## Creating a board game
-
-Under construction

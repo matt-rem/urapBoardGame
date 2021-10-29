@@ -4,7 +4,7 @@ from flask import Flask
 from flask import Flask, flash, request, redirect, url_for, render_template
 from werkzeug.utils import secure_filename
 
-UPLOAD_FOLDER = 'assets/board_images'
+UPLOAD_FOLDER = 'static/assets/board_images'
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -12,7 +12,11 @@ app.config['SECRET_KEY'] = "secret"
 
 @app.route("/")
 def home():
-    return render_template('home.html')
+    con = sqlite3.connect('database.db')
+    board_images = ['assets/board_images/' + a[0] for a in list(con.execute('''SELECT file_name FROM boards'''))]
+    list_index = list(range(len(board_images)))
+    print(list_index)
+    return render_template('home.html', boards=board_images, image_indexes=list_index)
 
 @app.route('/uploader', methods = ['GET', 'POST'])
 def upload_file():
@@ -37,4 +41,5 @@ def upload_file():
             return redirect("/")
 
 if __name__ == '__main__':
+    app.debug=True
     app.run()

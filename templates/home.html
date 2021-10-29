@@ -10,6 +10,7 @@
         <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
         <!-- Core theme CSS (includes Bootstrap)-->
         <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet" />
+        <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet" />
     </head>
     <body>
         <div class="d-flex" id="wrapper">
@@ -50,25 +51,75 @@
                     </div>
                 </nav>
                 <!-- Page content-->
-                <div class="container-fluid">
-                    <h1 class="mt-4">Upload Image</h1>
-                    <p>Step 1: Please upload an image of your board here (png and jpgs preferred)</p>
-                    <form action="/uploader" method="POST" enctype="multipart/form-data">
-                        <div class="mb-3">
-                            <label for="formFile" class="form-label" >Press on the button and select an image</label>
-                            <input class="form-control" type="file" id="formFile" accept=".jpg,.jpeg,.png"  name="file" onchange="loadFile(event)">
+                <div class="container-fluid d-flex flex-column justify-content-between">
+                    <div class="container-fluid mb-4">
+                        <h1 class="mt-4">Upload Image</h1>
+                        <p>Step 1: Please upload an image of your board here (png and jpgs preferred)</p>
+                        <form action="/uploader" method="POST" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="formFile" class="form-label" >Press on the button and select an image</label>
+                                <input class="form-control" type="file" id="formFile" accept=".jpg,.jpeg,.png"  name="file" onchange="loadFile(event)">
+                            </div>
+                            <p><img id="upload-display" width="45%" /></p>
+                            <button type="submit" class="btn btn-primary" style="display: none" id="submit-button">Submit</button>
+                        </form>
+                        <script>
+                            var loadFile = function(event) {
+                                var image = document.getElementById('upload-display');
+                                image.src = URL.createObjectURL(event.target.files[0]);
+                                var submit = document.getElementById('submit-button');
+                                submit.style.display = "initial";
+                            };
+                        </script>
+                    </div>
+                    <div class="container-fluid d-flex flex-column justify-content-between mt-4 ">
+                        <div class="container my-3 mx-0 px-0">
+                            <h2 class="font-weight-light">Or, alternatively, choose one of the below!</h2>
+                            <div class="row mx-0 my-0 justify-content-center">
+                                <div id="recipeCarousel" class="carousel slide" data-bs-ride="carousel">
+                                    <div class="carousel-inner" role="listbox">
+                                        {% for i in image_indexes %}
+                                        <div class="carousel-item {% if i == 0 %} active {% endif %}">
+                                            <div class="col-md-3 d-flex align-items-center">
+                                                <div class="card">
+                                                    <div class="card-img align-items-center">
+                                                        <input type="image" class="board-button img-fluid" name="Name of image button" src="{{ url_for('static', filename=boards[i]) }}">  
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    <a class="carousel-control-prev bg-transparent w-aut" href="#recipeCarousel" role="button" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    </a>
+                                    <a class="carousel-control-next bg-transparent w-aut" href="#recipeCarousel" role="button" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
-                        <p><img id="upload-display" width="45%" /></p>
-                        <button type="submit" class="btn btn-primary" style="display: none" id="submit-button">Submit</button>
-                    </form>
-                    <script>
-                        var loadFile = function(event) {
-                            var image = document.getElementById('upload-display');
-                            image.src = URL.createObjectURL(event.target.files[0]);
-                            var submit = document.getElementById('submit-button');
-                            submit.style.display = "initial";
-                        };
-                    </script>
+                        <form action="/uploader" method="POST" enctype="multipart/form-data">
+                            <input type="text" value="" style="display: none">
+                            <button type="submit" class="btn btn-primary" style="display: none" id="submit-selected-image-button">Submit</button>
+                        </form>
+                        <script>
+                            let items = document.querySelectorAll('.carousel .carousel-item')
+                            items.forEach((el) => {
+                                const minPerSlide = 4
+                                let next = el.nextElementSibling
+                                for (var i=1; i<minPerSlide; i++) {
+                                    if (!next) {
+                                        // wrap carousel by using first child
+                                        next = items[0]
+                                    }
+                                    let cloneChild = next.cloneNode(true)
+                                    el.appendChild(cloneChild.children[0])
+                                    next = next.nextElementSibling
+                                }
+                            })
+                        </script>
+                    </div>
                 </div>
             </div>
         </div>

@@ -75,16 +75,54 @@
                     <div class="container-fluid d-flex flex-column justify-content-between mt-4 ">
                         <div class="container my-3 mx-0 px-0">
                             <h2 class="font-weight-light">Or, alternatively, choose one of the below!</h2>
-                            <div class="container-fluid d-flex flex-row">
-                                <div class="col-lg-12 col-md-10 ">
-                                    <div class="horizontal-scroll-container">
-                                        {% for board in boards %}
-                                            <input type="image" class="board-button img-fluid" name="{{ board }}" src="{{ url_for('static', filename=board) }}">  
-                                        {% endfor %}
-                                    </div>
+                            <div class="row mx-0 my-0 justify-content-center">
+                                <div id="recipeCarousel" class="carousel slide" data-bs-ride="carousel">
+                                    <form action="/uploader" method="POST" enctype="multipart/form-data">
+                                        <div class="row-fluid">
+                                            <div class="col-lg-12 col-md-10 ">
+                                                <div class="cover-container">
+                                                    {% for i in image_indexes %}
+                                                    <div class="carousel-item {% if i == 0 %} active {% endif %}">
+                                                        <div class="col-md-3 d-flex align-items-center">
+                                                            <div class="card">
+                                                                <div class="card-img align-items-center">
+                                                                    <!-- <input type="image" class="board-button img-fluid" name="Name of image button" src="{{ url_for('static', filename=boards[i]) }}">  -->
+                                                                    <input id="{{boards[i]}}" type="radio" name="{{boards[i]}}" value="{{boards[i]}}">
+                                                                    <label class="radio-button-image" style="background-image:url('{{ url_for('static', filename=boards[i]) }}')" for="{{boards[i]}}"></label> 
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <a class="carousel-control-prev bg-transparent w-aut" href="#recipeCarousel" role="button" data-bs-slide="prev">
+                                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        </a>
+                                        <a class="carousel-control-next bg-transparent w-aut" href="#recipeCarousel" role="button" data-bs-slide="next">
+                                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        </a>
+                                    </form>
                                 </div>
                             </div>
                         </div>
+                        <script>
+                            let items = document.querySelectorAll('.carousel .carousel-item')
+                            items.forEach((el) => {
+                                const minPerSlide = 4
+                                let next = el.nextElementSibling
+                                for (var i=1; i<minPerSlide; i++) {
+                                    if (!next) {
+                                        // wrap carousel by using first child
+                                        next = items[0]
+                                    }
+                                    let cloneChild = next.cloneNode(true)
+                                    el.appendChild(cloneChild.children[0])
+                                    next = next.nextElementSibling
+                                }
+                            })
+                        </script>
                     </div>
                 </div>
             </div>

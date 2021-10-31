@@ -38,6 +38,12 @@ def upload_file():
             db.close()
             return redirect("/")
 
+@app.route('/select_image', methods = ['GET', 'POST'])
+def select_board():
+    if request.method == "POST":
+        print(request.form.get('selected-board'))
+        return redirect("/")
+
 if __name__ == '__main__':
     app.debug=True
     app.run()

@@ -1,28 +1,54 @@
 .horizontal-scroll-container {
-  height: 30%;
+  height: 100%;
   width: 100%;
   white-space: nowrap;
   overflow-x: scroll;
-  overflow-y: hidden;
+  overflow-y: scroll;
 }
 .board-button {
   position: relative;
   display: inline-block;
-  margin: 8px 8px;
+  width: 400px;
+  height: 400px;
   box-shadow: 2px 2px 4px #bbb;
   border-top-right-radius: 4px;
-  height: 90%;
   vertical-align: bottom;
-  background-position: top left;
+  background-position: center center;
   background-repeat: no-repeat;
   background-size: cover;
+  cursor: pointer;
+  background-size: contain;
+  background-repeat: no-repeat;
+
+  -webkit-transition: all 100ms ease-in;
+       -moz-transition: all 100ms ease-in;
+            transition: all 100ms ease-in;
+    -webkit-filter: brightness(0.5) opacity(.7);
+       -moz-filter: brightness(0.5) opacity(.7);
+            filter: brightness(0.5) opacity(.7);
 }
 
-.board-button:hover {
-  transform: scale(105%);
-  transition-duration: 300ms;
+.board-button:hover{
+  -webkit-filter: brightness(1) opacity(.9);
+     -moz-filter: brightness(1) opacity(.9);
+          filter: brightness(1) opacity(.9);
 }
 
-.board-button:active {
-  transition-duration: scale(90%);
+.cc-selector input{
+  margin:0;padding:0;
+    -webkit-appearance:none;
+       -moz-appearance:none;
+            appearance:none;
+}
+
+.cc-selector input:active +.board-button {
+  opacity: .9;
+  border-radius: 2px;
+  border-color: red;
+}
+
+.cc-selector input:checked +.board-button {
+  -webkit-filter: none;
+     -moz-filter: none;
+          filter: none;
 }

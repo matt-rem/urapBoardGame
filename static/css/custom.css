@@ -15,14 +15,14 @@
 
 /* medium and up screens */
 @media (min-width: 768px) {
-    
+
     .carousel-inner .carousel-item-end.active,
     .carousel-inner .carousel-item-next {
       transform: translateX(25%);
       transition-duration: 200ms;
     }
-    
-    .carousel-inner .carousel-item-start.active, 
+
+    .carousel-inner .carousel-item-start.active,
     .carousel-inner .carousel-item-prev {
       transform: translateX(-25%);
       transition-duration: 200ms;
@@ -30,7 +30,26 @@
 }
 
 .carousel-inner .carousel-item-end,
-.carousel-inner .carousel-item-start { 
+.carousel-inner .carousel-item-start {
   transform: translateX(0);
 }
 
+.cc-selector input:active +.board-button {
+  opacity: .9;
+  border-radius: 2px;
+  border-color: red;
+}
+
+.cc-selector input:checked +.board-button {
+  -webkit-filter: none;
+     -moz-filter: none;
+          filter: none;
+}
+
+.align-vertical td, .align-vertical th {
+  vertical-align: middle;
+}
+
+.align-horizontal td, .align-vertical th {
+  text-align: center;
+}

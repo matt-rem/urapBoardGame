@@ -65,13 +65,6 @@ def gamepiece_upload():
     return render_template('gamepiece_upload.html')
 
 
-@app.route('/select_image', methods=['GET', 'POST'])
-def select_board():
-    if request.method == "POST":
-        print(request.form.get('selected-board'))
-        return redirect("/")
-
-
 if __name__ == '__main__':
     app.debug = True
     app.run()

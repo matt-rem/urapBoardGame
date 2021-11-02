@@ -70,7 +70,7 @@
                                   <tr>
                                     <th scope="row">1</th>
                                     <td><input class="form-control" type="file" accept=".jpg,.jpeg,.png"  name="file" onchange="loadFile(event, 'dice-1')"></td>
-                                    <td><img id="dice-1" width="50%" /></td>
+                                    <td><img id="dice-1" width="10%" /></td>
                                     <td><button type=button class="btn btn-primary mx-4" onclick="addRow('dice')" id="adddice">+</button><button type=button class="btn btn-danger" onclick="deleteRow('dice')" id="deletedice">-</button></td>
                                   </tr>
                                 </tbody>
@@ -90,7 +90,7 @@
                                   <tr>
                                     <th scope="row">1</th>
                                     <td><input class="form-control" type="file" accept=".jpg,.jpeg,.png"  name="file" onchange="loadFile(event, 'player-1')"></td>
-                                    <td><img id="player-1" width="50%" /></td>
+                                    <td><img id="player-1" width="10%" /></td>
                                     <td><button type=button class="btn btn-primary mx-4" onclick="addRow('player')" id="addplayer">+</button><button type=button class="btn btn-danger" onclick="deleteRow('player')" id="deleteplayer">-</button></td>
                                   </tr>
                                 </tbody>
@@ -101,7 +101,7 @@
                         <script>
                             var tableCurrentRow = new Object();
                             const upload_button = "<input class='form-control' type='file' accept='.jpg,.jpeg,.png'  name='file'>"
-                            const gamepiece_img = "<td><img width='50%' /></td>"
+                            const gamepiece_img = "<td><img width='10%' /></td>"
 
                             var loadFile = function(event, imgId) {
                                 var image = document.getElementById(imgId);

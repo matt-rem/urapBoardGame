@@ -19,11 +19,9 @@ Session(app)
 @app.route("/")
 def home():
     con = sqlite3.connect('database.db')
-    board_images = ['assets/board_images/' + a[0]
-                    for a in list(con.execute('''SELECT file_name FROM boards'''))]
-    list_index = list(range(len(board_images)))
-    print(list_index)
-    return render_template('home.html', boards=board_images, image_indexes=list_index)
+    board_image_paths = ['assets/board_images/' + a[0]
+                         for a in list(con.execute('''SELECT file_name FROM boards'''))]
+    return render_template('home.html', boards=board_image_paths)
 
 
 @app.route('/uploader', methods=['GET', 'POST'])
@@ -65,6 +63,13 @@ def board_setup():
 @app.route("/gamepiece", methods=['GET', 'POST'])
 def gamepiece_upload():
     return render_template('gamepiece_upload.html')
+
+
+@app.route('/select_image', methods=['GET', 'POST'])
+def select_board():
+    if request.method == "POST":
+        print(request.form.get('selected-board'))
+        return redirect("/")
 
 
 if __name__ == '__main__':

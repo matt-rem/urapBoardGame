@@ -64,6 +64,9 @@ def board_setup():
 def gamepiece_upload():
     return render_template('gamepiece_upload.html')
 
+@app.route("/test", methods=['GET', 'POST'])
+def test_website():
+    return render_template('PixiJStest.html')
 
 if __name__ == '__main__':
     app.debug = True

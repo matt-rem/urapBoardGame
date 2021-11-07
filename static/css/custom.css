@@ -60,3 +60,8 @@
 .align-horizontal td, .align-vertical th {
   text-align: center;
 }
+
+.game-container {
+  width: 50vw;
+  height: 37vw
+}

@@ -60,6 +60,7 @@
                             </div>
 
                             <script>
+
                                 let gameContainer = document.getElementById("game");
                                 let app = new PIXI.Application();
                                 let sprites = [];
@@ -73,6 +74,8 @@
                                     });
 
                                 let board = new PIXI.Sprite(board_texture)
+                                board.interactive = true;
+                                
                                 sprites.push(board);
 
                                 board.anchor.x = .5;
@@ -94,7 +97,7 @@
                                 }
 
                                 function resize() {
-                                    let ratio = gameContainer.innerWidth / gameContainer.innerHeight;
+                                    let ratio = gameContainer.clientWidth / gameContainer.clientHeight;
                                     if (gameContainer.clientWidth / gameContainer.clientHeight >= ratio) {
                                             var w = gameContainer.clientHeight * ratio;
                                             var h = gameContainer.clientHeight;
@@ -104,13 +107,77 @@
                                         }
                                     app.renderer.view.style.width = w + "px";
                                     app.renderer.view.style.height = h + "px";
-
-                                    // for (let i = 0; i < sprites.length; i++) {
-                                    //     app.renderer.render(board)
-                                    // }
                                 }
                                 
                                 window.onresize = resize;
+                            </script>
+
+
+                            <script>
+                                const textStyle = {fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'}
+                                let currentSquare = 1
+                                let coordinates = {}
+                                let squareMarkers = []
+                            
+                                function onClick (event) {
+                                    let xPos = event.data.global.x;
+                                    let yPos = event.data.global.y;
+                                    let text = new PIXI.Text(String(currentSquare), textStyle);
+                                    
+                                    text.squareNumber = currentSquare
+                                    text.interactive = true;
+                                    text.buttonMode = true;
+                                    text.dragging = false;
+                                    text.defaultCursor = 'grab'
+                                    squareMarkers.push(text);
+
+                                    app.stage.addChild(text)
+                                    text.anchor.x = .5;
+                                    text.anchor.y = .5;
+                                    text.x = xPos;
+                                    text.y = yPos;
+
+                                    text.on('mousedown', function (e) {
+                                        text.x = e.data.global.x;
+                                        text.y = e.data.global.y;
+                                        text.startingPosX = text.x;
+                                        text.startingPosY = text.y;
+                                        text.dragging = true;
+                                    });
+
+                                    text.on('mousemove', function (e) {
+                                        if (text.dragging) {
+                                            text.x = e.data.global.x;
+                                            text.y = e.data.global.y;
+                                        }
+                                    });
+
+                                    text.on('mouseup', function (e) {
+                                        text.x = e.data.global.x;
+                                        text.y = e.data.global.y;
+                                        if (Math.round(text.startingPosX) == Math.round(text.x) && Math.round(text.startingPosY) == Math.round(text.y)) {
+                                            deleteSquare(text.squareNumber);
+                                            return;
+                                        }
+                                        text.startingPosX = text.x;
+                                        text.startintPosY = text.y;
+                                        text.dragging = false;
+                                    });
+                                    currentSquare += 1;
+                                }
+
+                                function deleteSquare(squareNumber) {
+                                    squareIndex = squareNumber - 1;
+                                    for(let i = squareIndex; i < squareMarkers.length; i++) {
+                                        squareMarkers[i].squareNumber -= 1;
+                                        squareMarkers[i].text = String(squareMarkers[i].squareNumber);
+                                    }
+                                    app.stage.removeChild(squareMarkers[squareIndex]);
+                                    squareMarkers.splice(squareIndex, 1);
+                                    currentSquare -= 1
+                                }
+
+                                board.on('pointerdown', onClick);
                             </script>
 
                         </div>

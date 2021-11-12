@@ -54,11 +54,21 @@ def select_board():
         session['board_path'] = request.form.get('selected-board')
         return redirect("/setup_board")
 
-
 @app.route("/setup_board", methods=['GET', 'POST'])
 def board_setup():
     return render_template('board_setup.html', board=session.get('board_path', None))
 
+@app.route("/setup_finish", methods=['POST'])
+def setup_finished():
+    if request.method == 'POST':
+        squares_length = int(request.form.get("maxSquareNumber"))
+        square_coordinates_dict = {}
+        for i in range(squares_length):
+            coordinate_string = request.form.get(str(i))
+            coordinates = coordinate_string.split(" ")
+            square_coordinates_dict[str(i)] = (float(coordinates[0]), float(coordinates[1]))
+        session['square_coordinates'] = square_coordinates_dict
+        return redirect("/gamepiece")
 
 @app.route("/gamepiece", methods=['GET', 'POST'])
 def gamepiece_upload():

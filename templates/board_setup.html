@@ -164,6 +164,8 @@
                                         text.dragging = false;
                                     });
                                     currentSquare += 1;
+
+                                    document.getElementById("submit").style.display = "initial";
                                 }
 
                                 function deleteSquare(squareNumber) {
@@ -181,11 +183,47 @@
                             </script>
 
                         </div>
-                        <div class="container-fluid ml-4 mb-4">
+                        <div class="container-fluid ml-4 mb-4 justify-content-center" style="font-size: x-large">
                             <h1 class="mt-4 mb-4">Instructions:</h1>
-                            <p> 1. Click on the center of each square on the board to the left. </p>
-                            <p> ... </p>
+                            <p> Click on the center of each square on the board to the left, in the order of where the players should go!</p>
+                            <p> If you misplaced a square marker, simply drag and drop it to its correct location.</p>
+                            <p> To delete a square marker, click on it without dragging and dropping, and it will be automatically removed!</p>
+                            <p> When you're done, click the button below! </p>
+                            <div style="width: 100%; text-align: center;">
+                                <button class="btn btn-primary" id="submit" style="display: none" onclick="submit();">Done!</button>
+                            </div>
                         </div>
+
+                        <script>
+
+                            function post(path, lst) {
+
+                                const form = document.createElement('form');
+                                form.method = 'POST';
+                                form.action = path;
+
+                                for (let i = 0; i < lst.length; i++) {
+                                    let hiddenField = document.createElement('input');
+                                    hiddenField.type = 'hidden';
+                                    hiddenField.name = String(i);
+                                    hiddenField.value = String(lst[i].x) + " " + String(lst[i].y);
+                                    form.appendChild(hiddenField);
+                                }
+                                
+                                let lstLength = document.createElement('input');
+                                lstLength.type = 'hidden';
+                                lstLength.name = 'maxSquareNumber';
+                                lstLength.value = String(lst.length);
+                                form.appendChild(lstLength);
+
+                                document.body.appendChild(form);
+                                form.submit();
+                            }
+
+                            function submit () {
+                                post("/setup_finish", squareMarkers)
+                            }
+                        </script>
                     </div>
                 </div>
             </div>

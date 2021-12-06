@@ -21,9 +21,10 @@
                     <a class="list-group-item list-group-item-action list-group-item-light p-3 text-dark" href="/">1. Upload Image</a>
                     <a class="list-group-item list-group-item-action list-group-item-light p-3 text-dark" href="/setup_board">2. Setup Board</a>
                     <a class="list-group-item list-group-item-action list-group-item-light p-3 text-dark" href="/gamepiece">3. Upload Game Elements</a>
-                    <a class="list-group-item list-group-item-dark p-3 text-muted" href="#!">4. Set Game Rules</a>
+                    <!-- <a class="list-group-item list-group-item-dark p-3 text-muted" href="#!">4. Set Game Rules</a>
                     <a class="list-group-item list-group-item-dark p-3 text-muted" href="#!">5. Add Sound Effects</a>
-                    <a class="list-group-item list-group-item-dark p-3 text-muted" href="#!">6. Final Touches</a>
+                    <a class="list-group-item list-group-item-dark p-3 text-muted" href="/game">6. Final Touches</a> -->
+                    <a class="list-group-item list-group-item-dark p-3 text-muted" href="/game">4. Final Touches</a>
                 </div>
             </div>
             <!-- Page content wrapper-->
@@ -55,7 +56,7 @@
                     <div class="container-fluid mb-4">
                         <h1 class="mt-4">Upload/Choose Game Pieces</h1>
                         <p>Step 1: Please upload an image of your board here (png and jpgs preferred)</p>
-                        <form action="/uploader" method="POST" enctype="multipart/form-data">
+                        <form action="/piece_uploader" method="POST" enctype="multipart/form-data">
                             <h3> Dice </h3>
                             <table class="table table-hover align-vertical" id="dice-upload-table">
                                 <thead>
@@ -69,7 +70,7 @@
                                 <tbody>
                                   <tr>
                                     <th scope="row">1</th>
-                                    <td><input class="form-control" type="file" accept=".jpg,.jpeg,.png"  name="file" onchange="loadFile(event, 'dice-1')"></td>
+                                    <td><input class="form-control" type="file" accept=".jpg,.jpeg,.png"  name="dice1" onchange="loadFile(event, 'dice-1')"></td>
                                     <td><img id="dice-1" width="10%" /></td>
                                     <td><button type=button class="btn btn-primary mx-4" onclick="addRow('dice')" id="adddice">+</button><button type=button class="btn btn-danger" onclick="deleteRow('dice')" id="deletedice">-</button></td>
                                   </tr>
@@ -89,7 +90,7 @@
                                 <tbody>
                                   <tr>
                                     <th scope="row">1</th>
-                                    <td><input class="form-control" type="file" accept=".jpg,.jpeg,.png"  name="file" onchange="loadFile(event, 'player-1')"></td>
+                                    <td><input class="form-control" type="file" accept=".jpg,.jpeg,.png"  name="dice2" onchange="loadFile(event, 'player-1')"></td>
                                     <td><img id="player-1" width="10%" /></td>
                                     <td><button type=button class="btn btn-primary mx-4" onclick="addRow('player')" id="addplayer">+</button><button type=button class="btn btn-danger" onclick="deleteRow('player')" id="deleteplayer">-</button></td>
                                   </tr>
@@ -124,7 +125,8 @@
                                 newRow.appendChild(cell0);
                                 
                                 var cell1 = newRow.insertCell();
-                                cell1.innerHTML = upload_button
+                                cell1.innerHTML = upload_button;
+                                cell1.children[0].setAttribute("name", pieceType + tableCurrentRow[pieceType]);
                                 cell1.children[0].setAttribute("onchange", "loadFile(event, " + "'" + pieceType + "-" + tableCurrentRow[pieceType] +"')")
 
                                 var cell2 = newRow.insertCell();
@@ -150,6 +152,35 @@
                                 }
 
                                 document.getElementById(pieceType + "-upload-table").deleteRow(-1);
+                            }
+                        </script>
+                        <script>
+                            function post(path, lst) {
+                                
+                                const form = document.createElement('form');
+                                form.method = 'POST';
+                                form.action = path;
+
+                                for (let i = 0; i < lst.length; i++) {
+                                    let hiddenField = document.createElement('input');
+                                    hiddenField.type = 'hidden';
+                                    hiddenField.name = String(i);
+                                    hiddenField.value = String(lst[i].x) + " " + String(lst[i].y);
+                                    form.appendChild(hiddenField);
+                                }
+                                
+                                let lstLength = document.createElement('input');
+                                lstLength.type = 'hidden';
+                                lstLength.name = 'maxSquareNumber';
+                                lstLength.value = String(lst.length);
+                                form.appendChild(lstLength);
+
+                                document.body.appendChild(form);
+                                form.submit();
+                            }
+
+                            function submit () {
+                                post("/setup_finish", squareMarkers)
                             }
                         </script>
                     </div>

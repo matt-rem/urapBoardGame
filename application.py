@@ -6,6 +6,8 @@ from flask_session import Session
 from werkzeug.utils import secure_filename
 
 UPLOAD_FOLDER = 'static/assets/board_images'
+UPLOAD_FOLDER_GAME = 'static/assets/game_pieces'
+UPLOAD_FOLDER_DICE = 'static/assets/dice_sides'
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -47,6 +49,16 @@ def upload_file():
             db.close()
             return redirect("/setup_board")
 
+@app.route('/piece_uploader', methods=['GET', 'POST'])
+def upload_pieces():
+    if request.method == 'POST':
+        # check if the post request has the file part
+        currentIndex = 1
+        currentFileKey = 'dice' + currentIndex
+        while (currentFileKey in request.files):
+            file = request.files[currentFileKey]
+        return redirect("/setup_board")
+
 
 @app.route('/select_image', methods=['GET', 'POST'])
 def select_board():
@@ -73,6 +85,15 @@ def setup_finished():
 @app.route("/gamepiece", methods=['GET', 'POST'])
 def gamepiece_upload():
     return render_template('gamepiece_upload.html')
+
+@app.route("/game", methods=['GET', 'POST'])
+def play_game():
+    if request.method == 'GET':
+        return render_template('game.html', board=session.get('board_path', None), 
+                                coordinates=session.get('square_coordinates', None), 
+                                game_pieces=["assets/game_pieces/green_piece.png", "assets/game_pieces/blue_piece.png"], 
+                                dice_sides=["assets/dice_sides/dice1.png", "assets/dice_sides/dice2.png", "assets/dice_sides/dice3.png", 
+                                "assets/dice_sides/dice4.png", "assets/dice_sides/dice5.png", "assets/dice_sides/dice6.png"])
 
 @app.route("/test", methods=['GET', 'POST'])
 def test_website():

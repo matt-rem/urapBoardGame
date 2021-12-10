@@ -1,4 +1,4 @@
-wha<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="utf-8" />
@@ -67,8 +67,8 @@ wha<!DOCTYPE html>
                                 
                                 document.getElementById('game').appendChild(app.view)
 
-                                var board_texture = PIXI.Texture.from("{{ url_for('static', filename=board) }}");
-                                board_texture.on('update', () => { 
+                                var board_texture = PIXI.Texture.from("{{ board }}");
+                                board_texture.on('update', () => {
                                     scaleTo(board, app.renderer.width, app.renderer.height);
                                     app.renderer.render(app.stage);
                                     });

@@ -72,7 +72,7 @@
                                 ///////////////////////////////////
                                 //setup board and resizing function
                                 ///////////////////////////////////
-                                var board_texture = PIXI.Texture.from("{{ url_for('static', filename=board) }}");
+                                var board_texture = PIXI.Texture.from("{{ board }}");
                                 board_texture.on('update', () => { 
                                     scaleTo(board, app.renderer.width, app.renderer.height);
                                     app.renderer.render(app.stage);
@@ -177,7 +177,7 @@
                                 let dice_images = []
 
                                 {% for diceside in dice_sides %}
-                                var side = PIXI.Texture.from("{{ url_for('static', filename=diceside) }}")
+                                var side = PIXI.Texture.from("{{ diceside }}")
                                 dice_images.push(side)
                                 {% endfor %}
                                 console.log(dice_images)
@@ -245,7 +245,7 @@
                                 let piece = null;
 
                                 {% for gamePiece in game_pieces %}
-                                piece = PIXI.Texture.from("{{ url_for('static', filename=gamePiece) }}")
+                                piece = PIXI.Texture.from("{{ gamePiece }}")
                                 playerSrcs.push(piece)
                                 {% endfor %} 
 
@@ -282,14 +282,14 @@
                                         },
 
                                         moveTo: function(square) {
-                                            if (square == null) {
-                                                return "finished";
-                                            }
                                             if(this.currentSquare) {
                                                 this.currentSquare.removePlayer(this);
                                             }
                                             square.addPlayer(this);
                                             this.currentSquare = square;
+                                            if (square.nextSquare == null) {
+                                                return "finished";
+                                            }
                                         },
 
                                         moveToNextSquare: function() {
@@ -330,7 +330,6 @@
                                             return;
                                         }
                                         result = currentPlayer.moveToNextSquare();
-                                        console.log(result);
                                         if (result == "finished") {
                                             endGame("player " + (currentPlayerIndex + 1) + " wins!")
                                             return;

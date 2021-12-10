@@ -11,6 +11,8 @@ UPLOAD_FOLDER_DICE = 'static/assets/dice_sides'
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['UPLOAD_FOLDER_GAME'] = UPLOAD_FOLDER_GAME
+app.config['UPLOAD_FOLDER_DICE'] = UPLOAD_FOLDER_DICE
 app.config['SECRET_KEY'] = "secret"
 
 app.config["SESSION_PERMANENT"] = False
@@ -21,7 +23,7 @@ Session(app)
 @app.route("/")
 def home():
     con = sqlite3.connect('database.db')
-    board_image_paths = ['assets/board_images/' + a[0]
+    board_image_paths = [os.path.join(app.config['UPLOAD_FOLDER'], a[0])
                          for a in list(con.execute('''SELECT file_name FROM boards'''))]
     return render_template('home.html', boards=board_image_paths)
 
@@ -34,30 +36,51 @@ def upload_file():
             flash('No file part')
             return redirect("/")
         file = request.files['file']
-        # if user does not select file, browser also
-        # submit a empty part without filename
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
         if file:
-            db = sqlite3.connect('database.db')
-            name = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], name))
-            db.execute('''INSERT INTO boards (file_name) VALUES (?)''', (name,)
-                       )  # current error: unique parameter failed (should return error html instead)
-            db.commit()
-            db.close()
+            if not save_file(file, app.config['UPLOAD_FOLDER'], "file_name", "boards"):
+                return redirect("/error")
+            session['board_path'] = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(file.filename))
             return redirect("/setup_board")
 
 @app.route('/piece_uploader', methods=['GET', 'POST'])
 def upload_pieces():
     if request.method == 'POST':
-        # check if the post request has the file part
-        currentIndex = 1
-        currentFileKey = 'dice' + currentIndex
-        while (currentFileKey in request.files):
-            file = request.files[currentFileKey]
-        return redirect("/setup_board")
+        session['game_pieces'] = []
+        session['dice_sides'] = []
+        for key in request.files:
+            file = request.files[key]
+
+            if "player" in key:
+                folder_key = "UPLOAD_FOLDER_GAME"
+                session_key = "game_pieces"
+                sql_table = "game_pieces"
+            else:
+                folder_key = "UPLOAD_FOLDER_DICE"
+                session_key = "dice_sides"
+                sql_table = "dice_sides"
+            
+            success = save_file(file, app.config[folder_key], "file_name", sql_table)
+            if not success:
+                    return redirect("/error")
+
+            session[session_key].append(os.path.join(app.config[folder_key], secure_filename(file.filename)))
+        return redirect("/game")
+
+def save_file(file, folder, sql_column, sql_table):
+    if file.filename == '':
+        return False
+    name = secure_filename(file.filename)
+    file.save(os.path.join(folder, name))
+    db = sqlite3.connect('database.db')
+    board_image_paths = [a[0] for a in list(db.execute('SELECT ('+sql_column+') FROM ('+sql_table+')'))]
+    print(board_image_paths)
+    if name in board_image_paths:
+        flash("already exists!")
+        return False
+    db.execute('INSERT INTO '+sql_table+' ('+sql_column+') VALUES (?)', (name,))
+    db.commit()
+    db.close()
+    return True
 
 
 @app.route('/select_image', methods=['GET', 'POST'])
@@ -91,9 +114,8 @@ def play_game():
     if request.method == 'GET':
         return render_template('game.html', board=session.get('board_path', None), 
                                 coordinates=session.get('square_coordinates', None), 
-                                game_pieces=["assets/game_pieces/green_piece.png", "assets/game_pieces/blue_piece.png"], 
-                                dice_sides=["assets/dice_sides/dice1.png", "assets/dice_sides/dice2.png", "assets/dice_sides/dice3.png", 
-                                "assets/dice_sides/dice4.png", "assets/dice_sides/dice5.png", "assets/dice_sides/dice6.png"])
+                                game_pieces=session["game_pieces"], 
+                                dice_sides=session["dice_sides"])
 
 @app.route("/test", methods=['GET', 'POST'])
 def test_website():

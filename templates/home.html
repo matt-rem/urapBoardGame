@@ -82,8 +82,7 @@
                                         <div class="horizontal-scroll-container cc-selector justify-content-center">
                                                 {% for board in boards %}
                                                 <input type="radio" name="selected-board" value="{{ board }}" id="{{ board }}" onchange="showSubmit(event, '{{ board }}')"/>
-                                                {% set board_path = url_for('static', filename=board) %}
-                                                <label class="board-button" for="{{ board }}" style="background-image: url('{{ board_path }}');"></label>
+                                                <label class="board-button" for="{{ board }}" style="background-image: url('{{ board }}');"></label>
                                                 {% endfor %}
                                         </div>
                                     </div>

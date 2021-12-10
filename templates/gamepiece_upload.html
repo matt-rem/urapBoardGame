@@ -55,7 +55,7 @@
                 <div class="container-fluid d-flex flex-column justify-content-between">
                     <div class="container-fluid mb-4">
                         <h1 class="mt-4">Upload/Choose Game Pieces</h1>
-                        <p>Step 1: Please upload an image of your board here (png and jpgs preferred)</p>
+                        <p>Step 3: Please upload your dice and player images here (png and jpgs preferred)</p>
                         <form action="/piece_uploader" method="POST" enctype="multipart/form-data">
                             <h3> Dice </h3>
                             <table class="table table-hover align-vertical" id="dice-upload-table">
@@ -68,9 +68,9 @@
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  <tr>
+                                  <tr scope="row" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="drop(event)" ondragover="dragOver(event)">
                                     <th scope="row">1</th>
-                                    <td><input class="form-control" type="file" accept=".jpg,.jpeg,.png"  name="dice1" onchange="loadFile(event, 'dice-1')"></td>
+                                    <td><input class="form-control drag-area" type="file" accept=".jpg,.jpeg,.png"  name="dice1" onchange="loadFile(event, 'dice-1')"></td>
                                     <td><img id="dice-1" width="10%" /></td>
                                     <td><button type=button class="btn btn-primary mx-4" onclick="addRow('dice')" id="adddice">+</button><button type=button class="btn btn-danger" onclick="deleteRow('dice')" id="deletedice">-</button></td>
                                   </tr>
@@ -80,7 +80,7 @@
                               <h3 class="mt-5"> Player Pieces </h3>
                             <table class="table table-hover align-vertical" id="player-upload-table">
                                 <thead>
-                                  <tr>
+                                  <tr> 
                                     <th width="10%" scope="col">Player</th>
                                     <th width="20%" scope="col">Image</th>
                                     <th width="50%" scope="col">Preview</th>
@@ -88,27 +88,25 @@
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  <tr>
-                                    <th scope="row">1</th>
-                                    <td><input class="form-control" type="file" accept=".jpg,.jpeg,.png"  name="player1" onchange="loadFile(event, 'player-1')"></td>
+                                  <tr scope="row" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="drop(event)" ondragover="dragOver(event)">
+                                    <th>1</th>
+                                    <td><input class="form-control drag-area" type="file" accept=".jpg,.jpeg,.png"  name="player1" onchange="loadFile(event, 'player-1')"></td>
                                     <td><img id="player-1" width="10%" /></td>
                                     <td><button type=button class="btn btn-primary mx-4" onclick="addRow('player')" id="addplayer">+</button><button type=button class="btn btn-danger" onclick="deleteRow('player')" id="deleteplayer">-</button></td>
                                   </tr>
                                 </tbody>
                               </table>
-
-                            <button type="submit" class="btn btn-primary" style="display: none" id="submit-button">Submit</button>
+                              <button type="submit" class="btn btn-primary" style="display: none" id="submit">Submit</button>
                         </form>
                         <script>
                             var tableCurrentRow = new Object();
-                            const upload_button = "<input class='form-control' type='file' accept='.jpg,.jpeg,.png'  name='file'>"
+                            const upload_button = "<input class='form-control drag-area' type='file' accept='.jpg,.jpeg,.png'  name='file'>"
                             const gamepiece_img = "<td><img width='10%' /></td>"
 
                             var loadFile = function(event, imgId) {
                                 var image = document.getElementById(imgId);
                                 image.src = URL.createObjectURL(event.target.files[0]);
-                                var submit = document.getElementById('submit-button');
-                                submit.style.display = "initial";
+                                showSubmit();
                             };
 
                             var addRow = function(pieceType) {
@@ -119,6 +117,10 @@
 
                                 tBody = document.getElementById(pieceType + "-upload-table").getElementsByTagName('tbody')[0];
                                 var newRow = tBody.insertRow();
+                                newRow.setAttribute("ondragenter","dragEnter(event)")
+                                newRow.setAttribute("ondragleave","dragLeave(event)")
+                                newRow.setAttribute("ondragover", "dragOver(event)")
+                                newRow.setAttribute("ondrop","drop(event)")
 
                                 var cell0 = document.createElement('th');
                                 cell0.innerHTML = tableCurrentRow[pieceType]
@@ -187,21 +189,83 @@
                     <div class="container-fluid d-flex flex-column justify-content-between mt-4 ">
                         <div class="container my-3 mx-0 px-0">
                             <form action="/select_image" method="POST">
-                                <h2 class="font-weight-light">Or, alternatively, choose one of the below!</h2>
-                                <div class="container-fluid d-flex flex-row">
-                                    <div class="col-lg-12 col-md-10 ">
-                                        <div class="horizontal-scroll-container cc-selector justify-content-center">
-                                                UNDER CONSTRUCTION
+                                <h2 class="font-weight-light">Or use one of the below by dragging and dropping it onto the cell!</h2>
+                                <div class="container-fluid d-flex flex-row mb-3">
+                                    <div class="col-lg-12 col-md-10">
+                                        <div class="horizontal-scroll-container cc-selector justify-content-center py-3">
+                                            {% for dice in dice_sides %}
+                                            <input type="radio" name="selected-dice" value="{{ dice }}" id="{{ dice }}"/>
+                                            <label class="carousel-button dice-button" for="{{ dice }}" style="background-image: url('{{ dice }}');" draggable="true" ondragstart="startDragPiece(event)" ondragend="endDragPiece(event)"></label>
+                                            {% endfor %}
                                         </div>
                                     </div>
                                 </div>
-                                <button type="submit" class="btn btn-primary mt-3" style="display: none" id="submit-selected">Submit</button>
+                                <div class="container-fluid d-flex flex-row">
+                                    <div class="col-lg-12 col-md-10 ">
+                                        <div class="horizontal-scroll-container cc-selector justify-content-center py-3">
+                                            {% for player in player_pieces %}
+                                            <input type="radio" name="selected-player" value="{{ player }}" id="{{ player }}"/>
+                                            <label class="carousel-button player-button" for="{{ player }}" style="background-image: url('{{ player }}');" draggable="true" ondragstart="startDragPiece(event)" ondragend="endDragPiece(event)"></label>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </form>
                             <script>
-                                var showSubmit = function(event, val) {
-                                    var submit = document.getElementById('submit-selected');
+                                function startDragPiece(event) {
+                                    console.log("dragging", event.target.getAttribute("for"))
+                                    event.dataTransfer.setData('dragItem', event.target.getAttribute("for"))
+                                }
+
+                                function endDragPiece(event) {
+                                    console.log("stopped dragging")
+                                }
+
+                                function dragEnter(event) {
+                                    if (!event.target.classList.contains("drag-area")) {
+                                        return
+                                    }
+                                    event.preventDefault();
+                                    event.target.classList.add('drag-over');
+                                }
+
+                                function dragLeave(event) {
+                                    if (!event.target.classList.contains("drag-area")) {
+                                        return
+                                    }
+                                    event.preventDefault();
+                                    event.target.classList.remove('drag-over');
+                                }
+                                
+                                function drop(event) {
+                                    let element = event.target;
+                                    let imageSrc = event.dataTransfer.getData("dragItem")
+                                    if (!element || !element.classList.contains("drag-area")) {
+                                        return
+                                    }
+                                    element.classList.remove('drag-over');
+                                    element.setAttribute("type", "text")
+                                    element.setAttribute("readonly", "readonly")
+                                    element.setAttribute("value", imageSrc)
+
+                                    let imgElement = element.parentElement.nextElementSibling.children[0]
+                                    imgElement.src = imageSrc
+                                    showSubmit();
+                                    console.log(imgElement)
+                                }
+
+                                function dragOver(event) {
+                                    event.preventDefault();
+                                }
+
+                            </script>
+                            <script>
+                                var showSubmit = function() {
+                                    var submit = document.getElementById('submit');
                                     submit.style.display = "initial";
-                                    submit.value = val;
                                 };
                             </script>
                         </div>

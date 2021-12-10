@@ -79,10 +79,10 @@
                                 <h2 class="font-weight-light">Or, alternatively, choose one of the below!</h2>
                                 <div class="container-fluid d-flex flex-row">
                                     <div class="col-lg-12 col-md-10 ">
-                                        <div class="horizontal-scroll-container cc-selector justify-content-center">
+                                        <div class="horizontal-scroll-container cc-selector justify-content-center py-3">
                                                 {% for board in boards %}
                                                 <input type="radio" name="selected-board" value="{{ board }}" id="{{ board }}" onchange="showSubmit(event, '{{ board }}')"/>
-                                                <label class="board-button" for="{{ board }}" style="background-image: url('{{ board }}');"></label>
+                                                <label class="board-button carousel-button" for="{{ board }}" style="background-image: url('{{ board }}');"></label>
                                                 {% endfor %}
                                         </div>
                                     </div>

@@ -47,9 +47,14 @@ def upload_pieces():
     if request.method == 'POST':
         session['game_pieces'] = []
         session['dice_sides'] = []
+        for key in request.form:
+            src = request.form[key]
+            if "player" in key:
+                session["game_pieces"].append(src)
+            else:
+                session["dice_sides"].append(src)
         for key in request.files:
             file = request.files[key]
-
             if "player" in key:
                 folder_key = "UPLOAD_FOLDER_GAME"
                 session_key = "game_pieces"
@@ -107,7 +112,11 @@ def setup_finished():
 
 @app.route("/gamepiece", methods=['GET', 'POST'])
 def gamepiece_upload():
-    return render_template('gamepiece_upload.html')
+    db = sqlite3.connect('database.db')
+    dice_sides = [os.path.join(app.config["UPLOAD_FOLDER_DICE"], a[0]) for a in list(db.execute('SELECT (file_name) FROM (dice_sides)'))]
+    player_pieces = [os.path.join(app.config["UPLOAD_FOLDER_GAME"], a[0]) for a in list(db.execute('SELECT (file_name) FROM (game_pieces)'))]
+    db.close()
+    return render_template('gamepiece_upload.html', dice_sides=dice_sides, player_pieces=player_pieces)
 
 @app.route("/game", methods=['GET', 'POST'])
 def play_game():

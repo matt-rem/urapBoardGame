@@ -5,11 +5,10 @@
   overflow-x: scroll;
   overflow-y: hidden;
 }
-.board-button {
+
+.carousel-button {
   position: relative;
   display: inline-block;
-  width: 400px;
-  height: 400px;
   box-shadow: 2px 2px 4px #bbb;
   border-top-right-radius: 4px;
   vertical-align: bottom;
@@ -19,13 +18,31 @@
   cursor: pointer;
   background-size: contain;
   background-repeat: no-repeat;
+}
 
+.board-button {
+  width: 400px;
+  height: 400px;
   -webkit-transition: all 100ms ease-in;
-       -moz-transition: all 100ms ease-in;
-            transition: all 100ms ease-in;
-    -webkit-filter: brightness(0.5) opacity(.7);
-       -moz-filter: brightness(0.5) opacity(.7);
-            filter: brightness(0.5) opacity(.7);
+  -moz-transition: all 100ms ease-in;
+       transition: all 100ms ease-in;
+-webkit-filter: brightness(0.5) opacity(.7);
+  -moz-filter: brightness(0.5) opacity(.7);
+       filter: brightness(0.5) opacity(.7);
+}
+
+.dice-button {
+  width: 100px;
+  height: 100px;
+}
+
+.player-button {
+  width: 125px;
+  height: 125px;
+}
+
+.drag-over {
+  border: dashed 3px green;
 }
 
 .board-button:hover{

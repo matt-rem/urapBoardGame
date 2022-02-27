@@ -122,7 +122,6 @@
                                 const coordinates = {{ coordinates | tojson }}
                                 let squares = []
                                 let previousSquare = null;
-                                let nextSquare = null;
                                 for (let i = 0; i < Object.entries(coordinates).length; i++) {
                                     let newSquare = createSquare(coordinates[i][0], coordinates[i][1], null, null);
                                     console.log(newSquare);
@@ -175,7 +174,7 @@
                                 //create dice
                                 //////////////////////
                                 let dice_images = []
-
+                                
                                 {% for diceside in dice_sides %}
                                 var side = PIXI.Texture.from("{{ diceside }}")
                                 dice_images.push(side)

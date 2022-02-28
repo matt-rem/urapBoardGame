@@ -1,70 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-        <meta name="description" content="" />
-        <meta name="author" content="" />
-        <title>Hygiene Heroes Board Game Engine</title>
-        <!-- Favicon-->
-        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
-        <!-- Core theme CSS (includes Bootstrap)-->
-        <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet" />
-        <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet" />
-        <script src="https://pixijs.download/release/pixi.js"></script>
-    </head>
-    <body>
-        <div class="d-flex" id="wrapper">
-            <!-- Sidebar-->
-            <div class="border-end bg-white" id="sidebar-wrapper">
-                <div class="sidebar-heading border-bottom bg-light">urapBoardGame</div>
-                <div class="list-group list-group-flush">
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3 text-dark" href="/">1. Upload Image</a>
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3 text-dark" href="/setup_board">2. Setup Board</a>
-                    <a class="list-group-item list-group-item-action  list-group-item-light p-3 text-dark" href="/gamepiece">3. Upload Game Elements</a>
-                    <!-- <a class="list-group-item list-group-item-dark p-3 text-muted" href="#!">4. Set Game Rules</a>
-                    <a class="list-group-item list-group-item-dark p-3 text-muted" href="#!">5. Add Sound Effects</a>
-                    <a class="list-group-item list-group-item-dark p-3 text-muted" href="/game">6. Final Touches</a> -->
-                    <a class="list-group-item list-group-item-action  list-group-item-light p-3 text-dark" href="/game">4. Final Touches</a>
-                </div>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>Hygiene Heroes Board Game Engine</title>
+    <!-- Favicon-->
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet" />
+    <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet" />
+    <script src="https://pixijs.download/release/pixi.js"></script>
+</head>
+<body>
+    <div class="d-flex" id="wrapper">
+        <!-- Sidebar-->
+        <div class="border-end bg-white" id="sidebar-wrapper">
+            <div class="sidebar-heading border-bottom bg-light">urapBoardGame</div>
+            <div class="list-group list-group-flush">
+                <a class="list-group-item list-group-item-action list-group-item-light p-3 text-dark" href="/">1. Upload Image</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3 text-dark" href="/setup_board">2. Setup Board</a>
+                <a class="list-group-item list-group-item-action  list-group-item-light p-3 text-dark" href="/gamepiece">3. Upload Game Elements</a>
+                <!-- <a class="list-group-item list-group-item-dark p-3 text-muted" href="#!">4. Set Game Rules</a>
+                <a class="list-group-item list-group-item-dark p-3 text-muted" href="#!">5. Add Sound Effects</a>
+                <a class="list-group-item list-group-item-dark p-3 text-muted" href="/game">6. Final Touches</a> -->
+                <a class="list-group-item list-group-item-action  list-group-item-light p-3 text-dark" href="/game">4. Final Touches</a>
             </div>
-            <!-- Page content wrapper-->
-            <div id="page-content-wrapper">
-                <!-- Top navigation-->
-                <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
-                    <div class="container-fluid">
-                        <button class="btn btn-primary" id="sidebarToggle">Toggle</button>
-                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
-                        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                            <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
-                                <li class="nav-item active"><a class="nav-link" href="#!">Home</a></li>
-                                <li class="nav-item"><a class="nav-link" href="#!">Projects</a></li>
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Account</a>
-                                    <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                        <a class="dropdown-item" href="#!">My Account</a>
-                                        <a class="dropdown-item" href="#!">Logout</a>
-                                        <div class="dropdown-divider"></div>
-                                        <a class="dropdown-item" href="#!">Register</a>
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </nav>
-                <!-- Page content-->
-                <div class="container-fluid d-flex flex-column justify-content-between">
-                    <div class="container-fluid d-flex flex-row justify-content-between">
-                        <div class="container-fluid mb-4 text-center">
-                            <h1 class="mt-4">Playtest your game!</h1>
-                            <div class="container-fluid d-flex mb-4 flex-row justify-content-center align-items-center">
-                                <div class="game-container" id="game">
+        </div>
+        <!-- Page content wrapper-->
+        <div id="page-content-wrapper">
+            <!-- Top navigation-->
+            <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+                <div class="container-fluid">
+                    <button class="btn btn-primary" id="sidebarToggle">Toggle</button>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
+                            <li class="nav-item active"><a class="nav-link" href="#!">Home</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#!">Projects</a></li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Account</a>
+                                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                    <a class="dropdown-item" href="#!">My Account</a>
+                                    <a class="dropdown-item" href="#!">Logout</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="#!">Register</a>
                                 </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+            <!-- Page content-->
+            <div class="container-fluid d-flex flex-column justify-content-between">
+                <div class="container-fluid d-flex flex-row justify-content-between">
+                    <div class="container-fluid mb-4 text-center">
+                        <h1 class="mt-4">Playtest your game!</h1>
+                        <div class="container-fluid d-flex mb-4 flex-row justify-content-center align-items-center">
+                            <div class="game-container" id="game">
                             </div>
-                            <script>
+                        </div>
+                        <script>
                                 const diceRollAnimationTimes = 6;
                                 const rollAnimationDelay = 250;
-                                
+
                                 let gameContainer = document.getElementById("game");
                                 let app = new PIXI.Application();
                                 document.getElementById('game').appendChild(app.view)
@@ -73,7 +73,7 @@
                                 //setup board and resizing function
                                 ///////////////////////////////////
                                 var board_texture = PIXI.Texture.from("{{ board }}");
-                                board_texture.on('update', () => { 
+                                board_texture.on('update', () => {
                                     scaleTo(board, app.renderer.width, app.renderer.height);
                                     app.renderer.render(app.stage);
                                     });
@@ -112,16 +112,17 @@
                                     app.renderer.view.style.width = w + "px";
                                     app.renderer.view.style.height = h + "px";
                                 }
-                                
+
                                 window.onresize = resize;
-                            </script>
-                            <script>
+                        </script>
+                        <script>
                                 //////////////////////
                                 //create all squares
                                 //////////////////////
                                 const coordinates = {{ coordinates | tojson }}
                                 let squares = []
                                 let previousSquare = null;
+                                let nextSquare = null;
                                 for (let i = 0; i < Object.entries(coordinates).length; i++) {
                                     let newSquare = createSquare(coordinates[i][0], coordinates[i][1], null, null);
                                     console.log(newSquare);
@@ -137,6 +138,7 @@
                                     let square = {
                                         x: coordinateX,
                                         y: coordinateY,
+                                        squareType: "basic",
                                         previousSquare: previousSquare,
                                         nextSquare: nextSquare,
                                         players: [],
@@ -174,7 +176,7 @@
                                 //create dice
                                 //////////////////////
                                 let dice_images = []
-                                
+
                                 {% for diceside in dice_sides %}
                                 var side = PIXI.Texture.from("{{ diceside }}")
                                 dice_images.push(side)
@@ -246,7 +248,7 @@
                                 {% for gamePiece in game_pieces %}
                                 piece = PIXI.Texture.from("{{ gamePiece }}")
                                 playerSrcs.push(piece)
-                                {% endfor %} 
+                                {% endfor %}
 
                                 // let sprite = new PIXI.Sprite(piece);
                                 // sprite.position.x = app.renderer.width/2;
@@ -267,6 +269,7 @@
                                         positionX: startingX,
                                         positionY: startingY,
                                         currentSquare: null,
+                                        priorSquare: null,
 
                                         setPosition: function(posX, posY) {
                                             this.positionX = posX;
@@ -293,6 +296,21 @@
 
                                         moveToNextSquare: function() {
                                             return this.moveTo(this.currentSquare.nextSquare)
+                                        },
+
+                                        moveToPriorSquare: function () {
+                                            return this.moveTo(this.currentSquare.priorSquare)
+                                        },
+
+                                        checkSquareEvent: function () {
+                                            if (currentSquare.squareType == "chute") {
+                                                return;
+                                            }
+                                            if (currentSquare.squareType == "ladder") {
+                                                return;
+                                            } else {
+                                                return;
+                                            }
                                         }
                                     }
                                     player.sprite.anchor.x = .5;
@@ -323,6 +341,7 @@
                                     let steps = dice.roll(takeStep);
                                     function takeStep() {
                                         if (steps == 0) {
+                                            currentPlayer.checkSquareEvent();
                                             disableTurn = false;
                                             currentPlayerIndex = (currentPlayerIndex + 1) % numOfPlayers;
                                             currentPlayer = players[currentPlayerIndex];
@@ -343,16 +362,16 @@
                                     console.log(message);
                                     gameEnded = true;
                                 }
-                            </script>
+                        </script>
 
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- Bootstrap core JS-->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
-        <!-- Core theme JS-->
-        <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
-    </body>
+    </div>
+    <!-- Bootstrap core JS-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Core theme JS-->
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+</body>
 </html>

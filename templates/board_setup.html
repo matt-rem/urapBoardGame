@@ -64,6 +64,7 @@
                                 let gameContainer = document.getElementById("game");
                                 let app = new PIXI.Application();
                                 let sprites = [];
+                              
                                 
                                 document.getElementById('game').appendChild(app.view)
 
@@ -114,70 +115,171 @@
 
 
                             <script>
-                                const textStyle = {fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'}
+                                
+                                const textStyle = { fontFamily: 'Arial', fontSize: 24, fill: 0xff1010, align: 'center' }
+                                let phase = "phase-1";
                                 let currentSquare = 1
                                 let coordinates = {}
                                 let squareMarkers = []
+                                let eventSquareNumber = 0
+                                let selectedSquare = -1;
                             
-                                function onClick (event) {
+                                function onClick(event) {
                                     let xPos = event.data.global.x;
                                     let yPos = event.data.global.y;
-                                    let text = new PIXI.Text(String(currentSquare), textStyle);
-                                    
-                                    text.squareNumber = currentSquare
-                                    text.interactive = true;
-                                    text.buttonMode = true;
-                                    text.dragging = false;
-                                    text.defaultCursor = 'grab'
-                                    squareMarkers.push(text);
+                                    if (phase == "phase-1") {
+                                        let text = new PIXI.Text(String(currentSquare) + "\rbasic", textStyle);
 
-                                    app.stage.addChild(text)
-                                    text.anchor.x = .5;
-                                    text.anchor.y = .5;
-                                    text.x = xPos;
-                                    text.y = yPos;
+                                        text.squareNumber = currentSquare
+                                        text.squareType = "basic";
+                                        text.interactive = true;
+                                        text.buttonMode = true;
+                                        text.dragging = false;
+                                        text.defaultCursor = 'pointer';
+                                        squareMarkers.push(text);
 
-                                    text.on('mousedown', function (e) {
-                                        text.x = e.data.global.x;
-                                        text.y = e.data.global.y;
-                                        text.startingPosX = text.x;
-                                        text.startingPosY = text.y;
-                                        text.dragging = true;
-                                    });
+                                        app.stage.addChild(text)
+                                        text.anchor.x = .5;
+                                        text.anchor.y = .5;
+                                        text.x = xPos;
+                                        text.y = yPos;
 
-                                    text.on('mousemove', function (e) {
-                                        if (text.dragging) {
-                                            text.x = e.data.global.x;
-                                            text.y = e.data.global.y;
-                                        }
-                                    });
+                                        currentSquare += 1;
 
-                                    text.on('mouseup', function (e) {
-                                        text.x = e.data.global.x;
-                                        text.y = e.data.global.y;
-                                        if (Math.round(text.startingPosX) == Math.round(text.x) && Math.round(text.startingPosY) == Math.round(text.y)) {
-                                            deleteSquare(text.squareNumber);
+                                        text.on('mousedown', function (e) {
+                                            text.dragging = true;
+                                            text.startingPosX = text.x;
+                                            text.startingPosY = text.y;
+                                        });
+
+
+                                        text.on('mousemove', function (e) {
+                                            if (text.dragging) {
+                                                text.x = e.data.global.x;
+                                                text.y = e.data.global.y;
+                                            }
+                                        });
+
+
+                                        text.on('mouseup', function (e) {
+                                            text.dragging = false;
+                                            if (Math.round(text.startingPosX) == Math.round(text.x) && Math.round(text.startingPosY) == Math.round(text.y)) {
+                                                changeSquareType(text.squareNumber);
+                                                return;
+                                            }
+                                        });
+                                    } else {
+                                        text.on('mouseup', function (e) {
+                                            text.dragging = false;
+                                            if (Math.round(text.startingPosX) == Math.round(text.x) && Math.round(text.startingPosY) == Math.round(text.y)) {
+                                                changeSquareType(text.squareNumber);
+                                                return;
+                                            }
+                                        });
+
+                                    }
+                                if (currentSquare > 2) { document.getElementById("first-button").style.display = "initial"; }
+                                }
+
+                                function changeSquareType(squareNumber) {
+                                    squareIndex = squareNumber - 1;
+                                    if (phase == "phase-1") {
+                                        deleteSquare(squareNumber);
+                                        return;
+                                    }
+                                    if (phase == "phase-2") {
+                                        if (squareMarkers[squareIndex].squareType == "basic" && selectedSquare == -1) {
+                                            selectedSquare = squareIndex;
                                             return;
                                         }
-                                        text.startingPosX = text.x;
-                                        text.startintPosY = text.y;
-                                        text.dragging = false;
-                                    });
-                                    currentSquare += 1;
+                                        if (squareMarkers[squareIndex].squareType == "basic" && selectedSquare != -1) {
+                                            if (selectedSquare == squareIndex) {
+                                                selectedSquare = -1;
+                                                return;
+                                            }
+                                            eventSquareNumber++;
+                                            squareMarkers[squareIndex].squareType = "chute" + " " + eventSquareNumber;
+                                            squareMarkers[selectedSquare].squareType = "chute" + " " + eventSquareNumber;
+                                            squareMarkers[squareIndex].text = String(squareMarkers[squareIndex].squareNumber + "\r" + squareMarkers[squareIndex].squareType);
+                                            squareMarkers[selectedSquare].text = String(squareMarkers[selectedSquare].squareNumber + "\r" + squareMarkers[selectedSquare].squareType);
+                                            selectedSquare = -1;
+                                            return;
+                                        } else {
+                                            selectedSquare = -1;
+                                            deletePair(squareNumber);
+                                            return;
+                                        }
+                                    }
+                                    if (phase == "phase-3") {
+                                        if (squareMarkers[squareIndex].squareType == "basic" && selectedSquare == -1) {
+                                            selectedSquare = squareIndex;
+                                            return;
+                                        }
+                                        if (squareMarkers[squareIndex].squareType == "basic" && selectedSquare != -1) {
+                                            if (selectedSquare == squareIndex) {
+                                                selectedSquare = -1;
+                                                return;
+                                            }
+                                            eventSquareNumber++;
+                                            squareMarkers[squareIndex].squareType = "ladder" + " " + eventSquareNumber;
+                                            squareMarkers[selectedSquare].squareType = "ladder" + " " + eventSquareNumber;
+                                            squareMarkers[squareIndex].text = String(squareMarkers[squareIndex].squareNumber + "\r" + squareMarkers[squareIndex].squareType);
+                                            squareMarkers[selectedSquare].text = String(squareMarkers[selectedSquare].squareNumber + "\r" + squareMarkers[selectedSquare].squareType);
+                                            selectedSquare = -1;
+                                            return;
+                                        }
+                                        if (squareMarkers[squareIndex].squareType.includes("ladder")) {
+                                            deletePair(squareNumber);
+                                            selectedSquare = -1;
+                                            return;
+                                        } else { selectedSquare = -1;  return; }
+                                    }
 
-                                    document.getElementById("submit").style.display = "initial";
                                 }
 
                                 function deleteSquare(squareNumber) {
                                     squareIndex = squareNumber - 1;
                                     for(let i = squareIndex; i < squareMarkers.length; i++) {
                                         squareMarkers[i].squareNumber -= 1;
-                                        squareMarkers[i].text = String(squareMarkers[i].squareNumber);
+                                        squareMarkers[i].text = String(squareMarkers[i].squareNumber + "\r" + squareMarkers[i].squareType);
                                     }
                                     app.stage.removeChild(squareMarkers[squareIndex]);
                                     squareMarkers.splice(squareIndex, 1);
                                     currentSquare -= 1
                                 }
+
+                                function deletePair(squareNumber) {
+                                    squareIndex = squareNumber - 1;
+                                    var eventSquareIndex = parseInt(squareMarkers[squareIndex].squareType.split(" ").pop(), 10);
+                                    var eventSquareString = squareMarkers[squareIndex].squareType;
+                                    for (let i = 0; i < squareMarkers.length; i++) {
+                                        if (squareMarkers[i].squareType == eventSquareString) {
+                                            squareMarkers[i].squareType = "basic";
+                                            squareMarkers[i].text = String(squareMarkers[i].squareNumber + "\r" + squareMarkers[i].squareType);
+                                        }
+                                    }
+                                    eventSquareNumber--;
+                                    for (let i = 0; i < squareMarkers.length; i++) {
+                                        if (phase == "phase-2" && squareMarkers[i].squareType.includes("chute")) {
+                                            var clip = squareMarkers[i].squareType.split(" ").pop();
+                                            if (clip > eventSquareIndex) {
+                                                var num = parseInt(clip, 10) - 1;
+                                                squareMarkers[i].squareType = squareMarkers[i].squareType.replace(clip, num);
+                                                squareMarkers[i].text = String(squareMarkers[i].squareNumber + "\r" + squareMarkers[i].squareType);
+                                            }
+                                        }
+                                        if (phase == "phase-3" && squareMarkers[i].squareType.includes("ladder")) {
+                                            var clip = squareMarkers[i].squareType.split(" ").pop();
+                                            if (clip > eventSquareIndex) {
+                                                var num = parseInt(clip, 10) - 1;
+                                                squareMarkers[i].squareType = squareMarkers[i].squareType.replace(clip, num);
+                                                squareMarkers[i].text = String(squareMarkers[i].squareNumber + "\r" + squareMarkers[i].squareType);
+                                            }
+                                        }
+
+                                    }
+                                }
+                                
 
                                 board.on('pointerdown', onClick);
                             </script>
@@ -187,44 +289,68 @@
                             <h1 class="mt-4 mb-4">Instructions:</h1>
                             <p> Click on the center of each square on the board to the left, in the order of where the players should go!</p>
                             <p> If you misplaced a square marker, simply drag and drop it to its correct location.</p>
-                            <p> To delete a square marker, click on it without dragging and dropping, and it will be automatically removed!</p>
+                            <p> To pair square markers as chutes or ladders, click on the desired square pair in any order, and they will be updated!</p>
+                            <p> To delete a square marker, click on it until it dissapears!</p>
                             <p> When you're done, click the button below! </p>
                             <div style="width: 100%; text-align: center;">
-                                <button class="btn btn-primary" id="submit" style="display: none" onclick="submit();">Done!</button>
+                                <button class="btn btn-primary" id="first-button" style="display: none" onclick="submit();">I've added all my squares!</button>
+                                <button class="btn btn-primary" id="second-button" style="display: none" onclick="submit();">I've added all my chutes!</button>
+                                <button class="btn btn-primary" id="third-button" style="display: none" onclick="submit();">I've added all my ladders!</button>
+                                <button class="btn btn-primary" id="submit-button" style="display: none" onclick="submit();">Done!</button>
                             </div>
                         </div>
 
-                        <script>
+                            <script>
+                                function post(path, lst) {
 
-                            function post(path, lst) {
+                                    const form = document.createElement('form');
+                                    form.method = 'POST';
+                                    form.action = path;
 
-                                const form = document.createElement('form');
-                                form.method = 'POST';
-                                form.action = path;
+                                    for (let i = 0; i < lst.length; i++) {
+                                        let hiddenField = document.createElement('input');
+                                        hiddenField.type = 'hidden';
+                                        hiddenField.name = String(i);
+                                        hiddenField.value = String(lst[i].x) + " " + String(lst[i].y) + " " + lst[i].squareType;
+                                        form.appendChild(hiddenField);
+                                    }
 
-                                for (let i = 0; i < lst.length; i++) {
-                                    let hiddenField = document.createElement('input');
-                                    hiddenField.type = 'hidden';
-                                    hiddenField.name = String(i);
-                                    hiddenField.value = String(lst[i].x) + " " + String(lst[i].y);
-                                    form.appendChild(hiddenField);
+                                    let lstLength = document.createElement('input');
+                                    lstLength.type = 'hidden';
+                                    lstLength.name = 'maxSquareNumber';
+                                    lstLength.value = String(lst.length);
+                                    form.appendChild(lstLength);
+
+                                    document.body.appendChild(form);
+                                    form.submit();
+                                }
+
+                                function submit() {
+                                    if (phase == "phase-1") {
+                                        document.getElementById("first-button").remove();
+                                        document.getElementById("second-button").style.display = "initial";
+                                        phase = "phase-2";
+                                        eventSquareNumber = 0;
+                                        return;
+                                    }
+                                    if (phase == "phase-2") {
+                                        document.getElementById("second-button").remove();
+                                        document.getElementById("third-button").style.display = "initial";
+                                        phase = "phase-3";
+                                        eventSquareNumber = 0;
+                                        return;
+                                    }
+                                    if (phase == "phase-3") {
+                                        document.getElementById("third-button").remove();
+                                        document.getElementById("submit-button").style.display = "initial";
+                                        phase = "end";
+                                        eventSquareNumber = 0;
+                                        return;
+                                    } else { post("/setup_finish", squareMarkers); }
                                 }
                                 
-                                let lstLength = document.createElement('input');
-                                lstLength.type = 'hidden';
-                                lstLength.name = 'maxSquareNumber';
-                                lstLength.value = String(lst.length);
-                                form.appendChild(lstLength);
-
-                                document.body.appendChild(form);
-                                form.submit();
-                            }
-
-                            function submit () {
-                                post("/setup_finish", squareMarkers)
-                            }
-                        </script>
-                    </div>
+                            </script>
+                        </div>
                 </div>
             </div>
         </div>

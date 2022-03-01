@@ -61,6 +61,9 @@
                             </div>
 
                             <script>
+                                ////////////////////////////////////////
+                                // Setup for PIXI application
+                                ////////////////////////////////////////
                                 let gameContainer = document.getElementById("game");
                                 let app = new PIXI.Application();
                                 let sprites = [];
@@ -115,29 +118,38 @@
 
 
                             <script>
-                                
+                                ////////////////////////////////////////
+                                // Board setup
+                                ////////////////////////////////////////
+
+                                // Configurations for square number markers
                                 const textStyle = { fontFamily: 'Arial', fontSize: 24, fill: 0xff1010, align: 'center' }
-                                let phase = "phase-1";
                                 let currentSquare = 1
                                 let coordinates = {}
                                 let squareMarkers = []
                                 let eventSquareNumber = 0
                                 let selectedSquare = -1;
-                            
+                                let phase = "phase-1";
+
+                                // Adds a new marker for the position of a square
                                 function onClick(event) {
+                                    // Get position of user's click
                                     let xPos = event.data.global.x;
                                     let yPos = event.data.global.y;
+
                                     if (phase == "phase-1") {
                                         let text = new PIXI.Text(String(currentSquare) + "\rbasic", textStyle);
 
+                                        // Create new PIXI text element for marker
                                         text.squareNumber = currentSquare
                                         text.squareType = "basic";
                                         text.interactive = true;
                                         text.buttonMode = true;
                                         text.dragging = false;
                                         text.defaultCursor = 'pointer';
-                                        squareMarkers.push(text);
 
+                                        // Add marker to list and board
+                                        squareMarkers.push(text);
                                         app.stage.addChild(text)
                                         text.anchor.x = .5;
                                         text.anchor.y = .5;
@@ -146,6 +158,7 @@
 
                                         currentSquare += 1;
 
+                                        // Start of dragging/deleting action, tracks the starting position of the text being clicked
                                         text.on('mousedown', function (e) {
                                             text.dragging = true;
                                             text.startingPosX = text.x;
@@ -153,7 +166,9 @@
                                         });
 
 
+                                         // Dragging action of marker
                                         text.on('mousemove', function (e) {
+                                            // Every frame, set position of marker to cursor
                                             if (text.dragging) {
                                                 text.x = e.data.global.x;
                                                 text.y = e.data.global.y;
@@ -161,7 +176,9 @@
                                         });
 
 
+                                        // End dragging/deleting action of marker
                                         text.on('mouseup', function (e) {
+                                            // Set marker's location to cursor's current location, one last time
                                             text.dragging = false;
                                             if (Math.round(text.startingPosX) == Math.round(text.x) && Math.round(text.startingPosY) == Math.round(text.y)) {
                                                 changeSquareType(text.squareNumber);
@@ -169,6 +186,8 @@
                                             }
                                         });
                                     } else {
+                                        // Check to see if the starting position is in fact almost the same as the ending position, in which case
+                                        // The user didn't actually drag it and thus the marker should be deleted.
                                         text.on('mouseup', function (e) {
                                             text.dragging = false;
                                             if (Math.round(text.startingPosX) == Math.round(text.x) && Math.round(text.startingPosY) == Math.round(text.y)) {
@@ -237,6 +256,7 @@
 
                                 }
 
+                                // Deletes the specified square number, and de-increments all square markers after it.
                                 function deleteSquare(squareNumber) {
                                     squareIndex = squareNumber - 1;
                                     for(let i = squareIndex; i < squareMarkers.length; i++) {
@@ -280,7 +300,7 @@
                                     }
                                 }
                                 
-
+                                // Bind the addMarker function to clicking the board
                                 board.on('pointerdown', onClick);
                             </script>
 
@@ -290,7 +310,7 @@
                             <p> Click on the center of each square on the board to the left, in the order of where the players should go!</p>
                             <p> If you misplaced a square marker, simply drag and drop it to its correct location.</p>
                             <p> To pair square markers as chutes or ladders, click on the desired square pair in any order, and they will be updated!</p>
-                            <p> To delete a square marker, click on it until it dissapears!</p>
+                            <p> To delete a square marker, click on it until it disappears!</p>
                             <p> When you're done, click the button below! </p>
                             <div style="width: 100%; text-align: center;">
                                 <button class="btn btn-primary" id="first-button" style="display: none" onclick="submit();">I've added all my squares!</button>
@@ -301,26 +321,70 @@
                         </div>
 
                             <script>
-                                function post(path, lst) {
 
+                                // Sends data about the board via a POST method to the backend.
+                                //
+                                // Due to the relative difficulty to make a POST method without using a form, this function essentially
+                                // creates an invisible form that has fields that are already filled in (from the data collected above)
+                                // that is then submitted and thus creates a POST request with all of the data to the backend, which then
+                                // processes the information and adds it to the user's session and the database.
+                                function post(path, lst) {
+                                    // Create the invisible form, set the method (POST) and the URL to send to. 
                                     const form = document.createElement('form');
                                     form.method = 'POST';
                                     form.action = path;
 
+                                    // Create an invisible input field for each square marker to send its data to the backend
                                     for (let i = 0; i < lst.length; i++) {
                                         let hiddenField = document.createElement('input');
                                         hiddenField.type = 'hidden';
+                                        // The name of the field (which is it's key in the key-value pair) is simply the index of the 
+                                        // square (e.g. 0 = square marker 1, 1 = square marker 2, etc.)
                                         hiddenField.name = String(i);
+                                        // This is very unprofessional and inefficient, but due to the nature of the input field (only accepts strings)
+                                        // it was the simplest solution. We concatenate the x coordinate and y coordinate of the square object
+                                        // and add a space in between to split them. The backend then unsplits it and re-parses it back to float coordinates.
                                         hiddenField.value = String(lst[i].x) + " " + String(lst[i].y) + " " + lst[i].squareType;
                                         form.appendChild(hiddenField);
                                     }
 
+                                    // Add one more element for the total number of square markers. This is then used in a range loop in the backend
+                                    // as keys to get all values from the square input fields above.
                                     let lstLength = document.createElement('input');
                                     lstLength.type = 'hidden';
                                     lstLength.name = 'maxSquareNumber';
                                     lstLength.value = String(lst.length);
                                     form.appendChild(lstLength);
 
+                                    // Submit the form, completing the process and sending all coordinates to the backend.
+                                    // TODO: either stop using this inefficient and dumb form method (https://stackoverflow.com/questions/29987323/how-do-i-send-data-from-js-to-python-with-flask)
+                                    // OR add more fields to describe the behavior of each square marker (chute, ladder, stop, etc.)
+                                    // Ideally, the post method would send a JSON object, with keys and values like:
+                                    // {
+                                    //     "0": { // (square 1, no special behavior)
+                                    //         "x": 200,
+                                    //         "y": 400,
+                                    //         "isDefault": true,
+                                    //         "behavior": null,
+                                    //         "partner": null,
+                                    //     },
+                                    //     "1": { (square 1, ladder to 2 (redundant, but for sake of example))
+                                    //         "x": 250,
+                                    //         "y": 400,
+                                    //         "isDefault": false,
+                                    //         "behavior": "ladder",
+                                    //         "partner": 2,
+                                    //     }
+                                    //     "2": { (square 2, ladder from 1)
+                                    //         "x": 300,
+                                    //         "y": 400,
+                                    //         "isDefault": false,
+                                    //         "behavior": "ladder",
+                                    //         "partner": 1,
+                                    //     }
+                                    // }
+                                    // Which can then be parsed by the python backend through the key-value pairs to record this data and 
+                                    // save it to the database.
                                     document.body.appendChild(form);
                                     form.submit();
                                 }

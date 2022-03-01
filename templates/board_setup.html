@@ -1,3 +1,11 @@
+<!--
+    Main page for setting up the board game itself. Does the following:
+    - Sets the location (center) of each square within the board
+    - TODO: Sets chutes and ladder squares
+    - TODO: Sets Stop and roll again squares
+    - Converts all information above to data that is then sent to the backend to store within the database.
+-->
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -61,6 +69,9 @@
                             </div>
 
                             <script>
+                                ////////////////////////////////////////
+                                // Setup for PIXI application
+                                ////////////////////////////////////////
                                 let gameContainer = document.getElementById("game");
                                 let app = new PIXI.Application();
                                 let sprites = [];
@@ -114,29 +125,39 @@
 
 
                             <script>
+                                ////////////////////////////////////////
+                                // Board setup
+                                ////////////////////////////////////////
+
+                                // Configurations for square number markers
                                 const textStyle = {fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'}
                                 let currentSquare = 1
                                 let coordinates = {}
                                 let squareMarkers = []
                             
-                                function onClick (event) {
+                                // Adds a new marker for the position of a square
+                                function addMarker (event) {
+                                    // Get position of user's click
                                     let xPos = event.data.global.x;
                                     let yPos = event.data.global.y;
+
+                                    // Create new PIXI text element for marker
                                     let text = new PIXI.Text(String(currentSquare), textStyle);
-                                    
                                     text.squareNumber = currentSquare
                                     text.interactive = true;
                                     text.buttonMode = true;
                                     text.dragging = false;
                                     text.defaultCursor = 'grab'
-                                    squareMarkers.push(text);
 
+                                    // Add marker to list and board
+                                    squareMarkers.push(text);
                                     app.stage.addChild(text)
                                     text.anchor.x = .5;
                                     text.anchor.y = .5;
                                     text.x = xPos;
                                     text.y = yPos;
 
+                                    // Start of dragging/deleting action, tracks the starting position of the text being clicked
                                     text.on('mousedown', function (e) {
                                         text.x = e.data.global.x;
                                         text.y = e.data.global.y;
@@ -145,16 +166,23 @@
                                         text.dragging = true;
                                     });
 
+                                    // Dragging action of marker
                                     text.on('mousemove', function (e) {
+                                        // Every frame, set position of marker to cursor
                                         if (text.dragging) {
                                             text.x = e.data.global.x;
                                             text.y = e.data.global.y;
                                         }
                                     });
 
+                                    // End dragging/deleting action of marker
                                     text.on('mouseup', function (e) {
+                                        // Set marker's location to cursor's current location, one last time
                                         text.x = e.data.global.x;
                                         text.y = e.data.global.y;
+                                        
+                                        // Check to see if the starting position is in fact almost the same as the ending position, in which case
+                                        // The user didn't actually drag it and thus the marker should be deleted.
                                         if (Math.round(text.startingPosX) == Math.round(text.x) && Math.round(text.startingPosY) == Math.round(text.y)) {
                                             deleteSquare(text.squareNumber);
                                             return;
@@ -165,9 +193,13 @@
                                     });
                                     currentSquare += 1;
 
+                                    // Enable the clicking of submit (as we have added one or more markers)
+                                    // TODO: If the user deletes all markers after they added it though, they'll still be able to submit. 
+                                    // Should add a check to make sure there are at least 2 squares when clicking submit.
                                     document.getElementById("submit").style.display = "initial";
                                 }
 
+                                // Deletes the specified square number, and de-increments all square markers after it.
                                 function deleteSquare(squareNumber) {
                                     squareIndex = squareNumber - 1;
                                     for(let i = squareIndex; i < squareMarkers.length; i++) {
@@ -179,7 +211,8 @@
                                     currentSquare -= 1
                                 }
 
-                                board.on('pointerdown', onClick);
+                                // Bind the addMarker function to clicking the board
+                                board.on('pointerdown', addMarker);
                             </script>
 
                         </div>

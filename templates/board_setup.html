@@ -1,3 +1,11 @@
+<!--
+    Main page for setting up the board game itself. Does the following:
+    - Sets the location (center) of each square within the board
+    - TODO: Sets chutes and ladder squares
+    - TODO: Sets Stop and roll again squares
+    - Converts all information above to data that is then sent to the backend to store within the database.
+-->
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -67,8 +75,8 @@
                                 let gameContainer = document.getElementById("game");
                                 let app = new PIXI.Application();
                                 let sprites = [];
-                              
-                                
+
+
                                 document.getElementById('game').appendChild(app.view)
 
                                 var board_texture = PIXI.Texture.from("{{ board }}");
@@ -79,7 +87,7 @@
 
                                 let board = new PIXI.Sprite(board_texture)
                                 board.interactive = true;
-                                
+
                                 sprites.push(board);
 
                                 board.anchor.x = .5;
@@ -112,7 +120,7 @@
                                     app.renderer.view.style.width = w + "px";
                                     app.renderer.view.style.height = h + "px";
                                 }
-                                
+
                                 window.onresize = resize;
                             </script>
 
@@ -299,7 +307,7 @@
 
                                     }
                                 }
-                                
+
                                 // Bind the addMarker function to clicking the board
                                 board.on('pointerdown', onClick);
                             </script>
@@ -329,7 +337,7 @@
                                 // that is then submitted and thus creates a POST request with all of the data to the backend, which then
                                 // processes the information and adds it to the user's session and the database.
                                 function post(path, lst) {
-                                    // Create the invisible form, set the method (POST) and the URL to send to. 
+                                    // Create the invisible form, set the method (POST) and the URL to send to.
                                     const form = document.createElement('form');
                                     form.method = 'POST';
                                     form.action = path;
@@ -338,7 +346,7 @@
                                     for (let i = 0; i < lst.length; i++) {
                                         let hiddenField = document.createElement('input');
                                         hiddenField.type = 'hidden';
-                                        // The name of the field (which is it's key in the key-value pair) is simply the index of the 
+                                        // The name of the field (which is it's key in the key-value pair) is simply the index of the
                                         // square (e.g. 0 = square marker 1, 1 = square marker 2, etc.)
                                         hiddenField.name = String(i);
                                         // This is very unprofessional and inefficient, but due to the nature of the input field (only accepts strings)
@@ -383,7 +391,7 @@
                                     //         "partner": 1,
                                     //     }
                                     // }
-                                    // Which can then be parsed by the python backend through the key-value pairs to record this data and 
+                                    // Which can then be parsed by the python backend through the key-value pairs to record this data and
                                     // save it to the database.
                                     document.body.appendChild(form);
                                     form.submit();
@@ -412,7 +420,7 @@
                                         return;
                                     } else { post("/setup_finish", squareMarkers); }
                                 }
-                                
+
                             </script>
                         </div>
                 </div>

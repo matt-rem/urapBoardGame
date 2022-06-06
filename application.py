@@ -37,7 +37,7 @@ def home():
 
     # Take every stored board image path in database and concatenate with board image folder path to get relative path to each board game image
     # List of relative paths is then use by flask templating engine to create scrolling series of existing board images that user can choose.
-    board_image_paths = [os.path.join(app.config['UPLOAD_FOLDER_BOARD'], a[0])
+    board_image_paths = [(app.config['UPLOAD_FOLDER_BOARD'] + "/" + a[0])
                          for a in list(db.execute('''SELECT file_name FROM boards'''))]
     db.close()
 
@@ -61,7 +61,7 @@ def upload_board():
                 return redirect("/error")
             
             # Save currently uploaded board to user session so they can start using it immediately for board setup phase
-            session['board_path'] = os.path.join(app.config['UPLOAD_FOLDER_BOARD'], secure_filename(file.filename)) 
+            session['board_path'] = (app.config['UPLOAD_FOLDER_BOARD'] + "/" + secure_filename(file.filename)) 
             return redirect("/setup_board")
 
 @app.route('/select_image', methods=['GET', 'POST'])
@@ -123,7 +123,7 @@ def upload_pieces():
                     return redirect("/error")
             
             # Add this image path to the respective user session list so that the final board game can reference and use it.
-            session[session_key].append(os.path.join(app.config[folder_key], secure_filename(file.filename)))
+            session[session_key].append(app.config[folder_key] + "/" + secure_filename(file.filename))
         return redirect("/game")
 
 def save_file(file, folder, sql_column, sql_table):
@@ -190,8 +190,8 @@ def gamepiece_upload():
     images rather than having to re-upload or constantly use new images.
     '''
     db = sqlite3.connect(DATABASE_PATH)
-    dice_sides = [os.path.join(app.config["UPLOAD_FOLDER_DICE"], a[0]) for a in list(db.execute('SELECT (file_name) FROM (dice_sides)'))]
-    player_pieces = [os.path.join(app.config["UPLOAD_FOLDER_GAME"], a[0]) for a in list(db.execute('SELECT (file_name) FROM (game_pieces)'))]
+    dice_sides = [(app.config["UPLOAD_FOLDER_DICE"] + "/" + a[0]) for a in list(db.execute('SELECT (file_name) FROM (dice_sides)'))]
+    player_pieces = [(app.config["UPLOAD_FOLDER_GAME"] + "/" + a[0]) for a in list(db.execute('SELECT (file_name) FROM (game_pieces)'))]
     db.close()
     return render_template('gamepiece_upload.html', dice_sides=dice_sides, player_pieces=player_pieces)
 

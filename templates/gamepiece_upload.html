@@ -156,35 +156,6 @@
                                 document.getElementById(pieceType + "-upload-table").deleteRow(-1);
                             }
                         </script>
-                        <script>
-                            function post(path, lst) {
-                                
-                                const form = document.createElement('form');
-                                form.method = 'POST';
-                                form.action = path;
-
-                                for (let i = 0; i < lst.length; i++) {
-                                    let hiddenField = document.createElement('input');
-                                    hiddenField.type = 'hidden';
-                                    hiddenField.name = String(i);
-                                    hiddenField.value = String(lst[i].x) + " " + String(lst[i].y);
-                                    form.appendChild(hiddenField);
-                                }
-                                
-                                let lstLength = document.createElement('input');
-                                lstLength.type = 'hidden';
-                                lstLength.name = 'maxSquareNumber';
-                                lstLength.value = String(lst.length);
-                                form.appendChild(lstLength);
-
-                                document.body.appendChild(form);
-                                form.submit();
-                            }
-
-                            function submit () {
-                                post("/setup_finish", squareMarkers)
-                            }
-                        </script>
                     </div>
                     <div class="container-fluid d-flex flex-column justify-content-between mt-4 ">
                         <div class="container my-3 mx-0 px-0">

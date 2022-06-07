@@ -2,6 +2,7 @@
 # Backend for hosting website and processing requests, data, and 
 # create/send HTML pages with custom board game configurations
 # -----------------------------------------------------------
+from datetime import datetime
 import os
 import sqlite3
 from flask import Flask
@@ -55,13 +56,14 @@ def upload_board():
             flash('No file part')
             return redirect("/")
         file = request.files['file']
+        name = str(hash(datetime.now()))
         if file:
             # Attempts to upload image and path to folder and backend, respectively. If error occurs, abort.
-            if not save_file(file, app.config['UPLOAD_FOLDER_BOARD'], "file_name", "boards"):                          
+            if not save_file(file, app.config['UPLOAD_FOLDER_BOARD'], "file_name", "boards", name):                          
                 return redirect("/error")
             
             # Save currently uploaded board to user session so they can start using it immediately for board setup phase
-            session['board_path'] = (app.config['UPLOAD_FOLDER_BOARD'] + "/" + secure_filename(file.filename)) 
+            session['board_path'] = (app.config['UPLOAD_FOLDER_BOARD'] + "/" + name) 
             return redirect("/setup_board")
 
 @app.route('/select_image', methods=['GET', 'POST'])
@@ -105,7 +107,7 @@ def upload_pieces():
                 session["game_pieces"].append(src)
             else:
                 session["dice_sides"].append(src)
-
+                
         for key in request.files:
             # Upload every board piece image in the request to the database and folder. 
             file = request.files[key]
@@ -118,22 +120,22 @@ def upload_pieces():
                 session_key = "dice_sides"
                 sql_table = "dice_sides"
             
-            success = save_file(file, app.config[folder_key], "file_name", sql_table)
+            name = str(hash(datetime.now()))
+            success = save_file(file, app.config[folder_key], "file_name", sql_table, name)
             if not success:
                     return redirect("/error")
             
             # Add this image path to the respective user session list so that the final board game can reference and use it.
-            session[session_key].append(app.config[folder_key] + "/" + secure_filename(file.filename))
+            session[session_key].append(app.config[folder_key] + "/" + name)
         return redirect("/game")
 
-def save_file(file, folder, sql_column, sql_table):
+def save_file(file, folder, sql_column, sql_table, name):
     '''
     Uploads the file object to folder, and adds the name of that file to the specific sql column in the sql table.
     Returns a boolean signifying if it was successful (False = failed, True = success)
     '''
     if file.filename == '':
         return False
-    name = secure_filename(file.filename)
     file.save(os.path.join(folder, name))
     db = sqlite3.connect(DATABASE_PATH)
     board_image_paths = [a[0] for a in list(db.execute('SELECT ('+sql_column+') FROM ('+sql_table+')'))]

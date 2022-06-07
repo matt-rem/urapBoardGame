@@ -145,6 +145,9 @@
                                 if (tableCurrentRow[pieceType] == null) {
                                     tableCurrentRow[pieceType] = 1
                                 }
+                                if (tableCurrentRow[pieceType] == 1) {
+                                    return
+                                }
                                 tableCurrentRow[pieceType] -= 1;
 
                                 if (tableCurrentRow[pieceType] > 0) {

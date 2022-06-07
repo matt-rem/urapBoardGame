@@ -9,6 +9,7 @@ from flask import Flask
 from flask import Flask, flash, request, redirect, url_for, render_template, session
 from flask_session import Session
 from werkzeug.utils import secure_filename
+import re
 
 # Paths to each folder for storing board game element images and data
 UPLOAD_FOLDER_BOARD = 'static/assets/board_images'
@@ -94,23 +95,25 @@ def upload_pieces():
     '''
     if request.method == 'POST':
         # Initialize game_pieces and dice_size sessions as empty lists so we can add multiple paths inside for each piece
-        session['game_pieces'] = []
-        session['dice_sides'] = []
+        session['game_pieces'] = {}
+        session['dice_sides'] = {}
         for key in request.form:
             # Request.form contains a list of paths to existing game pieces and dice pieces that the user selected in the Upload
             # Game Elements phase. No need to upload or modify these - just use directly for the final board game.
-            src = request.form[key]
-
+            src_value = request.form[key]
+            key_int = re.sub("[^0-9]", "", key)
             # Add selected image path to either gamepiece or dicesides user session list (depending on what it is) for final board game 
             # to reference and use.
             if "player" in key:
-                session["game_pieces"].append(src)
+                session["game_pieces"].update({key_int: src_value})
             else:
-                session["dice_sides"].append(src)
-                
+                session["dice_sides"].update({key_int: src_value})
         for key in request.files:
             # Upload every board piece image in the request to the database and folder. 
             file = request.files[key]
+            key_int = re.sub("[^0-9]", "", key)
+            name = str(hash(datetime.now()))
+
             if "player" in key:  # It's a player piece image, upload to player piece folder and database
                 folder_key = "UPLOAD_FOLDER_GAME"
                 session_key = "game_pieces"
@@ -120,13 +123,13 @@ def upload_pieces():
                 session_key = "dice_sides"
                 sql_table = "dice_sides"
             
-            name = str(hash(datetime.now()))
             success = save_file(file, app.config[folder_key], "file_name", sql_table, name)
             if not success:
                     return redirect("/error")
             
             # Add this image path to the respective user session list so that the final board game can reference and use it.
-            session[session_key].append(app.config[folder_key] + "/" + name)
+            session[session_key].update({key_int: app.config[folder_key] + "/" + name})
+
         return redirect("/game")
 
 def save_file(file, folder, sql_column, sql_table, name):
@@ -139,7 +142,6 @@ def save_file(file, folder, sql_column, sql_table, name):
     file.save(os.path.join(folder, name))
     db = sqlite3.connect(DATABASE_PATH)
     board_image_paths = [a[0] for a in list(db.execute('SELECT ('+sql_column+') FROM ('+sql_table+')'))]
-    print(board_image_paths)
     if name in board_image_paths:  # FIXME: Duplicate images should be warned about before user actually uploads.
         flash("already exists!")
         return False
@@ -205,11 +207,13 @@ def play_game():
     Passes in all information currently stored in the user's session (that should have been filled out in previous phases either by
     uploading the user's images or selecting pre-existing images) so Jinja can integrate it into the JavaScript game engine.
     '''
+    sorted_game_pieces = sorted(session["game_pieces"].items(), key=lambda x: int(x[0]))
+    sorted_dice_sides = sorted(session["dice_sides"].items(), key=lambda x: int(x[0]))
     if request.method == 'GET':
         return render_template('game.html', board=session.get('board_path', None), 
                                 coordinates=session.get('square_coordinates', None), 
-                                game_pieces=session["game_pieces"], 
-                                dice_sides=session["dice_sides"])
+                                game_pieces=sorted_game_pieces, 
+                                dice_sides=sorted_dice_sides)
 
 @app.route("/test", methods=['GET', 'POST'])
 def test_website():

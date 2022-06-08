@@ -1,7 +1,7 @@
-# -----------------------------------------------------------
+# --------------------------------------------------------------
 # Backend for hosting website and processing requests, data, and 
 # create/send HTML pages with custom board game configurations
-# -----------------------------------------------------------
+# --------------------------------------------------------------
 from datetime import datetime
 import json
 import os
@@ -34,7 +34,47 @@ Session(app)
 @app.route("/")
 def home():
     """
-    Creates the page for the home/board upload phase. 
+    Creates the page for the home page. 
+    """
+    db = sqlite3.connect(DATABASE_PATH)
+
+    # Take every stored board image path in database and concatenate with board image folder path to get relative path to each board game image
+    # List of relative paths is then use by flask templating engine to create scrolling series of existing board images that user can choose.
+    finished_games = list(db.execute('''SELECT * FROM saved_games'''))
+    saved_games_dict = {}
+    print(list(finished_games))
+    for i in range(len(finished_games)):
+        game = {}
+        game["index"] = finished_games[i][0]
+        game["title"] = finished_games[i][1]
+        game["creator"] = finished_games[i][2]
+        game["board_path"] = finished_games[i][3]
+        saved_games_dict[i] = game
+    db.close()
+
+    return render_template('home.html', saved_game_data=saved_games_dict)
+
+
+@app.route("/setup_play", methods=['POST'])
+def setup_play():
+    if request.method == 'POST':
+        index = request.form.get("index")
+        db = sqlite3.connect(DATABASE_PATH)
+        cursor = db.cursor()
+        cursor.execute("""SELECT * FROM saved_games WHERE id=?""", (index,))
+        row = cursor.fetchone()
+        session["title"] = row[1]
+        session["creator"] = row[2]
+        session["board_path"] = row[3]
+        session["square_data"] = json.loads(row[4])
+        session["game_pieces"] = json.loads(row[5])
+        session["dice_sides"] = json.loads(row[6])
+    return redirect("/play")
+
+@app.route("/board_select")
+def board_select():
+    """
+    Creates the page for the board upload phase. 
     """
     db = sqlite3.connect(DATABASE_PATH)
 
@@ -44,7 +84,7 @@ def home():
                          for a in list(db.execute('''SELECT file_name FROM boards'''))]
     db.close()
 
-    return render_template('home.html', boards=board_image_paths)
+    return render_template('board_select.html', boards=board_image_paths)
 
 
 @app.route('/uploader', methods=['GET', 'POST'])
@@ -193,9 +233,9 @@ def gamepiece_upload():
     return render_template('gamepiece_upload.html', dice_sides=dice_sides, player_pieces=player_pieces)
 
 @app.route("/game", methods=['GET', 'POST'])
-def play_game():
+def playtest_game():
     '''
-    Creates the webpage for the final, finished board game
+    Creates the webpage for the final, finished board game (playtest)
 
     Passes in all information currently stored in the user's session (that should have been filled out in previous phases either by
     uploading the user's images or selecting pre-existing images) so Jinja can integrate it into the JavaScript game engine.
@@ -210,6 +250,17 @@ def play_game():
                                 game_pieces=[x[1] for x in sorted_game_pieces], 
                                 dice_sides=[x[1] for x in sorted_dice_sides])
 
+@app.route("/play")
+def play():
+    sorted_game_pieces = sorted(session["game_pieces"].items(), key=lambda x: int(x[0]))
+    sorted_dice_sides = sorted(session["dice_sides"].items(), key=lambda x: int(x[0]))
+    return render_template("play.html",
+                                title=session.get('title', None),
+                                creator=session.get('creator', None),
+                                board=session.get('board_path', None), 
+                                square_data=session.get('square_coordinates', None), 
+                                game_pieces=[x[1] for x in sorted_game_pieces], 
+                                dice_sides=[x[1] for x in sorted_dice_sides])
 
 @app.route("/save", methods=['POST'])
 def save_game():

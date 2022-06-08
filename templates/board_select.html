@@ -11,7 +11,6 @@
         <!-- Core theme CSS (includes Bootstrap)-->
         <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet" />
         <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet" />
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     </head>
     <body>
         <div class="d-flex" id="wrapper">
@@ -19,7 +18,7 @@
             <div class="border-end bg-white" id="sidebar-wrapper">
                 <a href="/" style="color: #000000; text-decoration: none;"><div class="sidebar-heading border-bottom bg-light">urapBoardGame</div></a>
                 <div class="list-group list-group-flush">
-                    <a class="list-group-item list-group-item-dark p-3 text-muted" href="/board_select">1. Upload Image</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3 text-dark" href="/board_select">1. Upload Image</a>
                     <a class="list-group-item list-group-item-dark p-3 text-muted" href="/setup_board">2. Setup Board</a>
                     <a class="list-group-item list-group-item-dark p-3 text-muted" href="/gamepiece">3. Upload Game Elements</a>
                     <a class="list-group-item list-group-item-dark p-3 text-muted" href="/game">4. Final Touches</a>
@@ -49,65 +48,52 @@
                     </div>
                 </nav>
                 <!-- Page content-->
-                <div class="container-fluid col">
-                    <div class="my-3 row container-fluid align-items-center">
-                        <h2 class="text-center">Welcome to the Hygiene Heroes Board Game Creator!</h2>
+                <div class="container-fluid d-flex flex-column justify-content-between">
+                    <div class="container-fluid mb-4">
+                        <h1 class="mt-4">Upload Image</h1>
+                        <p>Step 1: Please upload an image of your board here (png and jpgs preferred)</p>
+                        <form action="/uploader" method="POST" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="formFile" class="form-label" >Press on the button and select an image</label>
+                                <input class="form-control" type="file" id="formFile" accept=".jpg,.jpeg,.png"  name="file" onchange="loadFile(event)">
+                            </div>
+                            <p><img id="upload-display" width="45%" /></p>
+                            <button type="submit" class="btn btn-primary" style="display: none" id="submit-button">Submit</button>
+                        </form>
+                        <script>
+                            var loadFile = function(event) {
+                                var image = document.getElementById('upload-display');
+                                image.src = URL.createObjectURL(event.target.files[0]);
+                                var submit = document.getElementById('submit-button');
+                                submit.style.display = "initial";
+                            };
+                        </script>
                     </div>
-                    <div class="row container-fluid align-items-center">
-                        <p class="text-center">Click the button below to begin creating your own board game in 4 easy steps:</p>
+                    <div class="container-fluid d-flex flex-column justify-content-between mt-4 ">
+                        <div class="container my-3 mx-0 px-0">
+                            <form action="/select_image" method="POST">
+                                <h2 class="font-weight-light">Or choose one of the below!</h2>
+                                <div class="container-fluid d-flex flex-row">
+                                    <div class="col-lg-12 col-md-10 ">
+                                        <div class="horizontal-scroll-container cc-selector justify-content-center py-3">
+                                                {% for board in boards %}
+                                                <input type="radio" name="selected-board" value="{{ board }}" id="{{ board }}" onchange="showSubmit(event, '{{ board }}')"/>
+                                                <label class="board-button carousel-button" for="{{ board }}" style="background-image: url('{{ board }}');"></label>
+                                                {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary mt-3" style="display: none" id="submit-selected">Submit</button>
+                            </form>
+                            <script>
+                                var showSubmit = function(event, val) {
+                                    var submit = document.getElementById('submit-selected');
+                                    submit.style.display = "initial";
+                                    submit.value = val;
+                                };
+                            </script>
+                        </div>
                     </div>
-                    <div class="my-3 px-3 py-3 align-items-center text-center ">
-                        <button type="button" class="btn btn-primary btn-lg" onclick="location.href = '/board_select'">Start</button>
-                    </div>
-
-                    <div class="my-3 row container-fluid align-items-center">
-                        <h4 class="text-center">Or, try one of the games that others have created from below!</h4>
-                    </div>
-
-                    <div class="my-3 row container-fluid align-items-center">
-                        <table class="table text-center justify-content-center">
-                            <thead>
-                              <tr>
-                                <th scope="col">Title</th>
-                                <th scope="col">Creator</th>
-                                <th scope="col">Board Preview</th>
-                                <th scope="col"></th>
-                              </tr>
-                            </thead>
-                            <tbody id="savedGamesBody">
-                            </tbody>
-                          </table>
-                    </div>
-                    <script>
-                        const saved_games = {{ saved_game_data | tojson }}
-                        for (let i = 0; i < Object.keys(saved_games).length; i++) {
-                            tBody = document.getElementById("savedGamesBody");
-                            var newRow = tBody.insertRow();
-                            newRow.setAttribute("style","vertical-align: middle")
-
-                            var cell0 = document.createElement('th');
-                            cell0.innerHTML = saved_games[i]["title"]
-                            newRow.appendChild(cell0);
-
-                            var cell1 = newRow.insertCell();
-                            cell1.innerHTML = saved_games[i]["creator"]
-                            newRow.appendChild(cell1);
-
-                            var cell2 = newRow.insertCell();
-                            img = document.createElement("img")
-                            img.setAttribute("src", saved_games[i]["board_path"])
-                            img.setAttribute("style", "width:20%")
-                            cell2.appendChild(img);
-                            
-                            var cell3 = newRow.insertCell();
-                            button = document.createElement("button")
-                            button.setAttribute("type", "button")
-                            button.setAttribute("class", "btn btn-primary")
-                            button.onclick = () => {$.post('/setup_play', {'index': saved_games[i]["index"]}, () => {window.location.href = '/play'})}
-                            button.innerHTML = "Play!"
-                            cell3.appendChild(button)
-                        }
-                    </script>
                 </div>
             </div>
         </div>

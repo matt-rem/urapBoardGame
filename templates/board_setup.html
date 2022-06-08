@@ -26,14 +26,11 @@
         <div class="d-flex" id="wrapper">
             <!-- Sidebar-->
             <div class="border-end bg-white" id="sidebar-wrapper">
-                <div class="sidebar-heading border-bottom bg-light">urapBoardGame</div>
+                <a href="/" style="color: #000000; text-decoration: none;"><div class="sidebar-heading border-bottom bg-light">urapBoardGame</div></a>
                 <div class="list-group list-group-flush">
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3 text-dark" href="/">1. Upload Image</a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3 text-dark" href="/board_select">1. Upload Image</a>
                     <a class="list-group-item list-group-item-action list-group-item-light p-3 text-dark" href="/setup_board">2. Setup Board</a>
                     <a class="list-group-item list-group-item-dark p-3 text-muted" href="/gamepiece">3. Upload Game Elements</a>
-                    <!-- <a class="list-group-item list-group-item-dark p-3 text-muted" href="#!">4. Set Game Rules</a>
-                    <a class="list-group-item list-group-item-dark p-3 text-muted" href="#!">5. Add Sound Effects</a>
-                    <a class="list-group-item list-group-item-dark p-3 text-muted" href="/game">6. Final Touches</a> -->
                     <a class="list-group-item list-group-item-dark p-3 text-muted" href="/game">4. Final Touches</a>
                 </div>
             </div>
@@ -46,8 +43,7 @@
                         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
                         <div class="collapse navbar-collapse" id="navbarSupportedContent">
                             <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
-                                <li class="nav-item active"><a class="nav-link" href="#!">Home</a></li>
-                                <li class="nav-item"><a class="nav-link" href="#!">Projects</a></li>
+                                <li class="nav-item active"><a class="nav-link" href="/">Home</a></li>
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Account</a>
                                     <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
@@ -332,20 +328,34 @@
                             <script>
 
                                 // Sends data about the board via a POST method to the backend.
-                                //
-                                // Due to the relative difficulty to make a POST method without using a form, this function essentially
-                                // creates an invisible form that has fields that are already filled in (from the data collected above)
-                                // that is then submitted and thus creates a POST request with all of the data to the backend, which then
-                                // processes the information and adds it to the user's session and the database.
-                                function post(path, lst) {
 
-                                    // // Add one more element for the total number of square markers. This is then used in a range loop in the backend
-                                    // // as keys to get all values from the square input fields above.
-                                    // let lstLength = document.createElement('input');
-                                    // lstLength.type = 'hidden';
-                                    // lstLength.name = 'maxSquareNumber';
-                                    // lstLength.value = String(lst.length);
-                                    // form.appendChild(lstLength);
+                                // Ideally, the post would send a JSON object, with keys and values like:
+                                // {
+                                //     "0": { // (square 1, no special behavior)
+                                //         "x": 200,
+                                //         "y": 400,
+                                //         "isDefault": true,
+                                //         "behavior": null,
+                                //         "partner": null,
+                                //     },
+                                //     "1": { (square 1, ladder to 2 (redundant, but for sake of example))
+                                //         "x": 250,
+                                //         "y": 400,
+                                //         "isDefault": false,
+                                //         "behavior": "ladder",
+                                //         "partner": 2,
+                                //     }
+                                //     "2": { (square 2, ladder from 1)
+                                //         "x": 300,
+                                //         "y": 400,
+                                //         "isDefault": false,
+                                //         "behavior": "ladder",
+                                //         "partner": 1,
+                                //     }
+                                // }
+                                // Which can then be parsed by the python backend through the key-value pairs to record this data and
+                                // save it to the database.
+                                function post(path, lst) {
 
                                     data = {}
                                     for (let i = 0; i < lst.length; i++) {
@@ -357,37 +367,6 @@
                                     }
 
                                     $.post(path, {"json": JSON.stringify(data)}, () => {window.location.href = "/gamepiece"})
-
-
-                                    // Submit the form, completing the process and sending all coordinates to the backend.
-                                    // TODO: either stop using this inefficient and dumb form method (https://stackoverflow.com/questions/29987323/how-do-i-send-data-from-js-to-python-with-flask)
-                                    // OR add more fields to describe the behavior of each square marker (chute, ladder, stop, etc.)
-                                    // Ideally, the post method would send a JSON object, with keys and values like:
-                                    // {
-                                    //     "0": { // (square 1, no special behavior)
-                                    //         "x": 200,
-                                    //         "y": 400,
-                                    //         "isDefault": true,
-                                    //         "behavior": null,
-                                    //         "partner": null,
-                                    //     },
-                                    //     "1": { (square 1, ladder to 2 (redundant, but for sake of example))
-                                    //         "x": 250,
-                                    //         "y": 400,
-                                    //         "isDefault": false,
-                                    //         "behavior": "ladder",
-                                    //         "partner": 2,
-                                    //     }
-                                    //     "2": { (square 2, ladder from 1)
-                                    //         "x": 300,
-                                    //         "y": 400,
-                                    //         "isDefault": false,
-                                    //         "behavior": "ladder",
-                                    //         "partner": 1,
-                                    //     }
-                                    // }
-                                    // Which can then be parsed by the python backend through the key-value pairs to record this data and
-                                    // save it to the database.
                                 }
 
                                 function submit() {

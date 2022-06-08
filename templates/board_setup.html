@@ -20,6 +20,7 @@
         <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet" />
         <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet" />
         <script src="https://pixijs.download/release/pixi.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     </head>
     <body>
         <div class="d-flex" id="wrapper">
@@ -337,32 +338,26 @@
                                 // that is then submitted and thus creates a POST request with all of the data to the backend, which then
                                 // processes the information and adds it to the user's session and the database.
                                 function post(path, lst) {
-                                    // Create the invisible form, set the method (POST) and the URL to send to.
-                                    const form = document.createElement('form');
-                                    form.method = 'POST';
-                                    form.action = path;
 
-                                    // Create an invisible input field for each square marker to send its data to the backend
+                                    // // Add one more element for the total number of square markers. This is then used in a range loop in the backend
+                                    // // as keys to get all values from the square input fields above.
+                                    // let lstLength = document.createElement('input');
+                                    // lstLength.type = 'hidden';
+                                    // lstLength.name = 'maxSquareNumber';
+                                    // lstLength.value = String(lst.length);
+                                    // form.appendChild(lstLength);
+
+                                    data = {}
                                     for (let i = 0; i < lst.length; i++) {
-                                        let hiddenField = document.createElement('input');
-                                        hiddenField.type = 'hidden';
-                                        // The name of the field (which is it's key in the key-value pair) is simply the index of the
-                                        // square (e.g. 0 = square marker 1, 1 = square marker 2, etc.)
-                                        hiddenField.name = String(i);
-                                        // This is very unprofessional and inefficient, but due to the nature of the input field (only accepts strings)
-                                        // it was the simplest solution. We concatenate the x coordinate and y coordinate of the square object
-                                        // and add a space in between to split them. The backend then unsplits it and re-parses it back to float coordinates.
-                                        hiddenField.value = String(lst[i].x) + " " + String(lst[i].y) + " " + lst[i].squareType;
-                                        form.appendChild(hiddenField);
+                                        square = {}
+                                        square["x"] = lst[i].x
+                                        square["y"] = lst[i].y
+                                        square["type"] = lst[i].squareType;
+                                        data[String(i)] = square
                                     }
 
-                                    // Add one more element for the total number of square markers. This is then used in a range loop in the backend
-                                    // as keys to get all values from the square input fields above.
-                                    let lstLength = document.createElement('input');
-                                    lstLength.type = 'hidden';
-                                    lstLength.name = 'maxSquareNumber';
-                                    lstLength.value = String(lst.length);
-                                    form.appendChild(lstLength);
+                                    $.post(path, {"json": JSON.stringify(data)}, () => {window.location.href = "/gamepiece"})
+
 
                                     // Submit the form, completing the process and sending all coordinates to the backend.
                                     // TODO: either stop using this inefficient and dumb form method (https://stackoverflow.com/questions/29987323/how-do-i-send-data-from-js-to-python-with-flask)
@@ -393,8 +388,6 @@
                                     // }
                                     // Which can then be parsed by the python backend through the key-value pairs to record this data and
                                     // save it to the database.
-                                    document.body.appendChild(form);
-                                    form.submit();
                                 }
 
                                 function submit() {

@@ -3,6 +3,7 @@
 # create/send HTML pages with custom board game configurations
 # -----------------------------------------------------------
 from datetime import datetime
+import json
 import os
 import sqlite3
 from flask import Flask
@@ -129,8 +130,7 @@ def upload_pieces():
             
             # Add this image path to the respective user session list so that the final board game can reference and use it.
             session[session_key].update({key_int: app.config[folder_key] + "/" + name})
-
-        return redirect("/game")
+    return redirect("/game")
 
 def save_file(file, folder, sql_column, sql_table, name):
     '''
@@ -161,27 +161,20 @@ def board_setup():
 def setup_finished():
     '''
     Handles user's uploaded data after the setup phase. Uploads the coordinates of each square (as defined by the user)
-    of the currently selected board into the sesion and the TODO: database as well.
+    of the currently selected board into the session and the TODO: database as well.
     '''
+    squares_dict = {}
     if request.method == 'POST':
-        squares_length = int(request.form.get("maxSquareNumber"))  # Get the number of squares (this is for iterating through all keys)
+        data=json.loads(request.form.get(("json")))
+        print(data)
+        for i in range(0, len(data.keys())):
+            square = {}
+            square["x"] = data[str(i)]["x"]
+            square["y"] = data[str(i)]["y"]
+            square["type"] = data[str(i)]["type"]
+            squares_dict[str(i)] = square
+        session['square_coordinates'] = squares_dict
 
-        # Dictionary that stores each coordinate as key-value pairs. Key is the square index, while the value is a tuple with 
-        # the x coordinate in the first index, and y coordinate in the second.
-        square_coordinates_dict = {} 
-
-        for i in range(squares_length):
-            # The coordinates are stored in key-value pairs where
-            # Key: int index representing which square it is (0 = square 1, 1 = square 2, etc.)
-            # Value: a string with both the x and y coordinate separated by space e.g. ("20 60") means x: 20 and y: 60
-            coordinate_string = request.form.get(str(i))
-            coordinates = coordinate_string.split(" ")
-            square_coordinates_dict[str(i)] = (float(coordinates[0]), float(coordinates[1]))
-
-        # Add the dictionary to the session so the final finished board game can use it
-        session['square_coordinates'] = square_coordinates_dict
-
-        # TODO: also add these coordinates to the database so future users don't need to set up the board again
         return redirect("/gamepiece")
 
 @app.route("/gamepiece", methods=['GET', 'POST'])
@@ -209,11 +202,32 @@ def play_game():
     '''
     sorted_game_pieces = sorted(session["game_pieces"].items(), key=lambda x: int(x[0]))
     sorted_dice_sides = sorted(session["dice_sides"].items(), key=lambda x: int(x[0]))
+
     if request.method == 'GET':
-        return render_template('game.html', board=session.get('board_path', None), 
-                                coordinates=session.get('square_coordinates', None), 
-                                game_pieces=sorted_game_pieces, 
-                                dice_sides=sorted_dice_sides)
+        return render_template('game.html',
+                                board=session.get('board_path', None), 
+                                square_data=session.get('square_coordinates', None), 
+                                game_pieces=[x[1] for x in sorted_game_pieces], 
+                                dice_sides=[x[1] for x in sorted_dice_sides])
+
+
+@app.route("/save", methods=['POST'])
+def save_game():
+    game_title = request.form.get("gameTitle")
+    name = request.form.get("name")
+    board_path = session.get('board_path', None)
+    square_data = json.dumps(session.get('square_coordinates', None))
+    game_pieces = json.dumps(session.get("game_pieces", None))
+    dice_sides = json.dumps(session.get("dice_sides", None))
+    print((game_title, name, board_path, square_data, game_pieces, dice_sides))
+    db = sqlite3.connect(DATABASE_PATH)
+    db.execute('''INSERT INTO saved_games (title, creator, board_path, square_data, game_piece_paths, dice_side_paths) 
+                VALUES (?, ?, ?, ?, ?, ?)''', 
+                (game_title, name, board_path, square_data, game_pieces, dice_sides))
+    db.commit()
+    db.close()
+    print("hmm")
+    return redirect('/')
 
 @app.route("/test", methods=['GET', 'POST'])
 def test_website():

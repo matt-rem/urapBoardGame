@@ -259,62 +259,92 @@
                             players.push(player);
                         }
 
-                        function createPlayer(playerSrc, startingX=0, startingY=0) {
-                            let player = {
-                                playerSrc: playerSrc,
-                                sprite: new PIXI.Sprite(playerSrc),
-                                positionX: startingX,
-                                positionY: startingY,
-                                currentSquare: null,
-                                priorSquare: null,
+                    function createPlayer(playerSrc, startingX = 0, startingY = 0) {
+                        let player = {
+                            playerSrc: playerSrc,
+                            sprite: new PIXI.Sprite(playerSrc),
+                            positionX: startingX,
+                            positionY: startingY,
+                            currentSquare: null,
 
-                                setPosition: function(posX, posY) {
-                                    this.positionX = posX;
-                                    this.positionY = posY;
-                                    this.updateSprite();
-                                },
+                            setPosition: function (posX, posY) {
+                                this.positionX = posX;
+                                this.positionY = posY;
+                                this.updateSprite();
+                            },
 
-                                updateSprite: function() {
-                                    this.sprite.position.x = this.positionX;
-                                    this.sprite.position.y = this.positionY;
-                                    app.renderer.render(this.sprite);
-                                },
+                            updateSprite: function () {
+                                this.sprite.position.x = this.positionX;
+                                this.sprite.position.y = this.positionY;
+                                app.renderer.render(this.sprite);
+                            },
 
-                                moveTo: function(square) {
-                                    if(this.currentSquare) {
-                                        this.currentSquare.removePlayer(this);
-                                    }
-                                    square.addPlayer(this);
-                                    this.currentSquare = square;
-                                    if (square.nextSquare == null) {
-                                        return "finished";
-                                    }
-                                },
-
-                                moveToNextSquare: function() {
-                                    return this.moveTo(this.currentSquare.nextSquare)
-                                },
-
-                                moveToPriorSquare: function () {
-                                    return this.moveTo(this.currentSquare.priorSquare)
-                                },
-
-                                checkSquareEvent: function () {
-                                    if (currentSquare.squareType == "chute") {
-                                        return;
-                                    }
-                                    if (currentSquare.squareType == "ladder") {
-                                        return;
-                                    } else {
-                                        return;
-                                    }
+                            moveTo: function (square) {
+                                if (this.currentSquare) {
+                                    this.currentSquare.removePlayer(this);
                                 }
+                                square.addPlayer(this);
+                                this.currentSquare = square;
+                            },
+
+                            moveToNextSquare: function () {
+                                return this.moveTo(this.currentSquare.nextSquare)
+                            },
+
+                            moveToPreviousSquare: function () {
+                                return this.moveTo(this.currentSquare.previousSquare)
+                            },
+
+                            checkSquareEvent: function (stepNumber) {
+                                if (stepNumber == 0 && this.currentSquare.squareType.includes("chute")) {
+                                    this.chuteMove();
+                                }
+                                if (stepNumber == 0 && this.currentSquare.squareType.includes("ladder")) {
+                                    this.ladderMove();
+                                }
+                                if (this.currentSquare.nextSquare == null) {
+                                    return "finished";
+                                }
+                            },
+
+                            chuteMove: function () {
+                                if (this.currentSquare.squareType.includes("chute", "T")) {
+                                    targetSquare = this.currentSquare.squareType.replace("T", "B");
+                                    this.moveBackwardUntil(targetSquare);
+                                }
+                            },
+
+                            ladderMove: function () {
+                                if (this.currentSquare.squareType.includes("ladder", "B")) {
+                                    targetSquare = this.currentSquare.squareType.replace("B", "T");
+                                    this.moveForwardUntil(targetSquare);
+                                }
+                            },
+
+                            moveForwardUntil: function (squareType) {
+                                if (this.currentSquare.squareType != squareType) {
+                                    this.moveToNextSquare();
+                                    return this.moveForwardUntil(squareType);
+                                }
+                                return;
+                            },
+
+                            moveBackwardUntil: function (squareType) {
+                                if (this.currentSquare.squareType != squareType) {
+                                    this.moveToPreviousSquare();
+                                    return this.moveBackwardUntil(squareType);
+                                }
+                                return;
                             }
-                            player.sprite.anchor.x = .5;
-                            player.sprite.anchor.y = .5;
-                            app.stage.addChild(player.sprite)
-                            return player;
+
+
+
                         }
+                        player.sprite.anchor.x = .5;
+                        player.sprite.anchor.y = .5;
+                        app.stage.addChild(player.sprite)
+                        return player;
+                    }
 
                         //////////////////////
                         //main game loop
@@ -340,19 +370,20 @@
                         function playTurn() {
                             let steps = dice.roll(takeStep);
                             function takeStep() {
+                                if (result == "finished") {
+                                    endGame("player " + (currentPlayerIndex + 1) + " wins!");
+                                    return;
+                                }
                                 if (steps == 0) {
-                                    // currentPlayer.checkSquareEvent();
+                                    currentPlayer.checkSquareEvent(steps);
                                     disableTurn = false;
                                     currentPlayerIndex = (currentPlayerIndex + 1) % numOfPlayers;
                                     currentPlayer = players[currentPlayerIndex];
                                     return;
                                 }
-                                result = currentPlayer.moveToNextSquare();
-                                if (result == "finished") {
-                                    endGame("player " + (currentPlayerIndex + 1) + " wins!")
-                                    return;
-                                }
-                                setTimeout(takeStep, playerMoveDelay)
+                                currentPlayer.moveToNextSquare();
+                                setTimeout(takeStep, playerMoveDelay);
+                                result = currentPlayer.checkSquareEvent(steps);
                                 steps -= 1;
                             }
                         }

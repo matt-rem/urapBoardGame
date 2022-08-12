@@ -1,7 +1,7 @@
 <!--
     Main page for setting up the board game itself. Does the following:
     - Sets the location (center) of each square within the board
-    - TODO: Sets chutes and ladder squares
+    - Sets chutes and ladder squares
     - TODO: Sets Stop and roll again squares
     - Converts all information above to data that is then sent to the backend to store within the database.
 -->
@@ -224,6 +224,7 @@
                                             eventSquareNumber++;
                                             squareMarkers[squareIndex].squareType = "chute" + " " + eventSquareNumber;
                                             squareMarkers[selectedSquare].squareType = "chute" + " " + eventSquareNumber;
+                                            orient();
                                             squareMarkers[squareIndex].text = String(squareMarkers[squareIndex].squareNumber + "\r" + squareMarkers[squareIndex].squareType);
                                             squareMarkers[selectedSquare].text = String(squareMarkers[selectedSquare].squareNumber + "\r" + squareMarkers[selectedSquare].squareType);
                                             selectedSquare = -1;
@@ -247,6 +248,7 @@
                                             eventSquareNumber++;
                                             squareMarkers[squareIndex].squareType = "ladder" + " " + eventSquareNumber;
                                             squareMarkers[selectedSquare].squareType = "ladder" + " " + eventSquareNumber;
+                                            orient();
                                             squareMarkers[squareIndex].text = String(squareMarkers[squareIndex].squareNumber + "\r" + squareMarkers[squareIndex].squareType);
                                             squareMarkers[selectedSquare].text = String(squareMarkers[selectedSquare].squareNumber + "\r" + squareMarkers[selectedSquare].squareType);
                                             selectedSquare = -1;
@@ -259,6 +261,17 @@
                                         } else { selectedSquare = -1;  return; }
                                     }
 
+                                }
+
+                                function orient() {
+                                    if (squareIndex > selectedSquare) {
+                                        squareMarkers[selectedSquare].squareType = squareMarkers[selectedSquare].squareType + "B";
+                                        squareMarkers[squareIndex].squareType = squareMarkers[squareIndex].squareType + "T";
+                                    }
+                                    if (squareIndex < selectedSquare) {
+                                        squareMarkers[selectedSquare].squareType = squareMarkers[selectedSquare].squareType + "T";
+                                        squareMarkers[squareIndex].squareType = squareMarkers[squareIndex].squareType + "B";
+                                    }
                                 }
 
                                 // Deletes the specified square number, and de-increments all square markers after it.
@@ -278,7 +291,7 @@
                                     var eventSquareIndex = parseInt(squareMarkers[squareIndex].squareType.split(" ").pop(), 10);
                                     var eventSquareString = squareMarkers[squareIndex].squareType;
                                     for (let i = 0; i < squareMarkers.length; i++) {
-                                        if (squareMarkers[i].squareType == eventSquareString) {
+                                        if (squareMarkers[i].squareType.includes(eventSquareString.split(" ")[0]+" "+eventSquareIndex)) {
                                             squareMarkers[i].squareType = "basic";
                                             squareMarkers[i].text = String(squareMarkers[i].squareNumber + "\r" + squareMarkers[i].squareType);
                                         }
@@ -286,7 +299,7 @@
                                     eventSquareNumber--;
                                     for (let i = 0; i < squareMarkers.length; i++) {
                                         if (phase == "phase-2" && squareMarkers[i].squareType.includes("chute")) {
-                                            var clip = squareMarkers[i].squareType.split(" ").pop();
+                                            var clip = parseInt(squareMarkers[i].squareType.split(" ").pop());
                                             if (clip > eventSquareIndex) {
                                                 var num = parseInt(clip, 10) - 1;
                                                 squareMarkers[i].squareType = squareMarkers[i].squareType.replace(clip, num);
@@ -294,7 +307,7 @@
                                             }
                                         }
                                         if (phase == "phase-3" && squareMarkers[i].squareType.includes("ladder")) {
-                                            var clip = squareMarkers[i].squareType.split(" ").pop();
+                                            var clip = parseInt(squareMarkers[i].squareType.split(" ").pop());
                                             if (clip > eventSquareIndex) {
                                                 var num = parseInt(clip, 10) - 1;
                                                 squareMarkers[i].squareType = squareMarkers[i].squareType.replace(clip, num);

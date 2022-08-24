@@ -278,6 +278,7 @@
                                         positionX: startingX,
                                         positionY: startingY,
                                         currentSquare: null,
+                                        playerStatus: "active",
 
                                         setPosition: function (posX, posY) {
                                             this.positionX = posX;
@@ -308,11 +309,19 @@
                                         },
 
                                         checkSquareEvent: function (stepNumber) {
-                                            if (stepNumber == 0 && this.currentSquare.squareType.includes("chute")) {
-                                                this.chuteMove();
-                                            }
-                                            if (stepNumber == 0 && this.currentSquare.squareType.includes("ladder")) {
-                                                this.ladderMove();
+                                            if (stepNumber == 0) {
+                                                if(this.currentSquare.squareType.includes("chute")) {
+                                                    this.chuteMove();
+                                                }
+                                                if (this.currentSquare.squareType.includes("ladder")) {
+                                                    this.ladderMove();
+                                                }
+                                                if (this.currentSquare.squareType.includes("Lose_Turn")) {
+                                                    this.Lose_TurnMove();
+                                                }
+                                                if (this.currentSquare.squareType.includes("Roll_Again")) {
+                                                    this.Roll_AgainMove();
+                                                }
                                             }
                                             if (this.currentSquare.nextSquare == null) {
                                                 return "finished";
@@ -333,6 +342,16 @@
                                             }
                                         },
 
+                                        Lose_TurnMove: function () {
+                                            this.playerStatus = "disabled";
+                                            return;
+                                        },
+
+                                        Roll_AgainMove: function () {
+                                            this.playerStatus = "extraTurn";
+                                            return;
+                                        },
+
                                         moveForwardUntil: function (squareType) {
                                             if (this.currentSquare.squareType != squareType) {
                                                 this.moveToNextSquare();
@@ -348,9 +367,6 @@
                                             }
                                             return;
                                         }
-
-
-
                                     }
                                     player.sprite.anchor.x = .5;
                                     player.sprite.anchor.y = .5;
@@ -390,8 +406,7 @@
                                         if (steps == 0) {
                                             currentPlayer.checkSquareEvent(steps);
                                             disableTurn = false;
-                                            currentPlayerIndex = (currentPlayerIndex + 1) % numOfPlayers;
-                                            currentPlayer = players[currentPlayerIndex];
+                                            cyclePlayers();
                                             return;
                                         }
                                         currentPlayer.moveToNextSquare();
@@ -399,6 +414,23 @@
                                         result = currentPlayer.checkSquareEvent(steps);
                                         steps -= 1;
                                     }
+                                }
+
+                                function cyclePlayers() {
+                                    if (players[currentPlayerIndex].playerStatus == "extraTurn") {
+                                        players[currentPlayerIndex].playerStatus = "active";
+                                        playTurn();
+                                        return;
+                                    }
+                                    if (players[(currentPlayerIndex + 1) % numOfPlayers].playerStatus == "disabled") {
+                                        players[(currentPlayerIndex + 1) % numOfPlayers].playerStatus = "active";
+                                        currentPlayerIndex = (currentPlayerIndex + 2) % numOfPlayers;
+                                        currentPlayer = players[currentPlayerIndex];
+                                        return;
+                                    } else {
+                                        currentPlayerIndex = (currentPlayerIndex + 1) % numOfPlayers;
+                                        currentPlayer = players[currentPlayerIndex];
+                                    }    
                                 }
 
                                 function endGame(message) {

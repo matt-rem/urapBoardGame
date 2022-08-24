@@ -122,7 +122,7 @@
                         let previousSquare = null;
                         let nextSquare = null;
                         for (let i = 0; i < Object.keys(coordinates).length; i++) {
-                            let newSquare = createSquare(coordinates[i]["x"], coordinates[i]["y"], null, null);
+                            let newSquare = createSquare(coordinates[i]["x"], coordinates[i]["y"], coordinates[i]["type"], null, null);
                             if (previousSquare) {
                                 newSquare.previousSquare = previousSquare;
                                 previousSquare.nextSquare = newSquare;
@@ -131,38 +131,38 @@
                             previousSquare = newSquare;
                         }
 
-                        function createSquare(coordinateX, coordinateY, previousSquare, nextSquare) {
+                        function createSquare(coordinateX, coordinateY, coordinateType, previousSquare, nextSquare) {
                             let square = {
                                 x: coordinateX,
                                 y: coordinateY,
-                                squareType: "basic",
+                                squareType: coordinateType,
                                 previousSquare: previousSquare,
                                 nextSquare: nextSquare,
                                 players: [],
-                                addPlayer: function(player) {
+                                addPlayer: function (player) {
                                     this.players.push(player);
                                     this.updatePlayerLocations();
                                 },
-                                removePlayer: function(player) {
+                                removePlayer: function (player) {
                                     const index = this.players.indexOf(player);
                                     if (index > -1) {
                                         this.players.splice(index, 1);
                                     }
                                     this.updatePlayerLocations();
                                 },
-                                updatePlayerLocations: function() {
-                                    if(this.players.length == 1) {
+                                updatePlayerLocations: function () {
+                                    if (this.players.length == 1) {
                                         this.players[0].setPosition(this.x, this.y)
                                         return;
                                     }
                                     let radius = 0
                                     if (this.nextSquare) {
-                                        radius = Math.sqrt(Math.pow(this.x - this.nextSquare.x, 2), (Math.pow(this.y - this.nextSquare.y, 2)))/8;
+                                        radius = Math.sqrt(Math.pow(this.x - this.nextSquare.x, 2), (Math.pow(this.y - this.nextSquare.y, 2))) / 8;
                                     } else {
-                                        radius = Math.sqrt(Math.pow(this.x - this.previousSquare.x, 2), (Math.pow(this.y - this.previousSquare.y, 2)))/8;
+                                        radius = Math.sqrt(Math.pow(this.x - this.previousSquare.x, 2), (Math.pow(this.y - this.previousSquare.y, 2))) / 8;
                                     }
                                     for (let i = 0; i < this.players.length; i++) {
-                                        radians = (2 * Math.PI/this.players.length) * i;
+                                        radians = (2 * Math.PI / this.players.length) * i;
                                         this.players[i].setPosition(this.x + radius * Math.cos(radians), this.y + radius * Math.sin(radians))
                                     }
                                 }
@@ -296,11 +296,19 @@
                             },
 
                             checkSquareEvent: function (stepNumber) {
-                                if (stepNumber == 0 && this.currentSquare.squareType.includes("chute")) {
-                                    this.chuteMove();
-                                }
-                                if (stepNumber == 0 && this.currentSquare.squareType.includes("ladder")) {
-                                    this.ladderMove();
+                                if (stepNumber == 0) {
+                                    if (this.currentSquare.squareType.includes("chute")) {
+                                        this.chuteMove();
+                                    }
+                                    if (this.currentSquare.squareType.includes("ladder")) {
+                                        this.ladderMove();
+                                    }
+                                    if (this.currentSquare.squareType.includes("Lose_Turn")) {
+                                        this.Lose_TurnMove();
+                                    }
+                                    if (this.currentSquare.squareType.includes("Roll_Again")) {
+                                        this.Roll_AgainMove();
+                                    }
                                 }
                                 if (this.currentSquare.nextSquare == null) {
                                     return "finished";
@@ -319,6 +327,16 @@
                                     targetSquare = this.currentSquare.squareType.replace("B", "T");
                                     this.moveForwardUntil(targetSquare);
                                 }
+                            },
+
+                            Lose_TurnMove: function () {
+                                this.playerStatus = "disabled";
+                                return;
+                            },
+
+                            Roll_AgainMove: function () {
+                                this.playerStatus = "extraTurn";
+                                return;
                             },
 
                             moveForwardUntil: function (squareType) {
@@ -355,9 +373,10 @@
                         const playerMoveDelay = 200;
                         let disableTurn = false;
                         let gameEnded = false;
+                        let result = null;
 
-                        document.body.onkeyup = function(e){
-                            if(!(e.keyCode == 32)){
+                        document.body.onkeyup = function (e) {
+                            if (!(e.keyCode == 32)) {
                                 return;
                             }
                             if (disableTurn || gameEnded) {
@@ -377,8 +396,7 @@
                                 if (steps == 0) {
                                     currentPlayer.checkSquareEvent(steps);
                                     disableTurn = false;
-                                    currentPlayerIndex = (currentPlayerIndex + 1) % numOfPlayers;
-                                    currentPlayer = players[currentPlayerIndex];
+                                    cyclePlayers();
                                     return;
                                 }
                                 currentPlayer.moveToNextSquare();
@@ -388,7 +406,25 @@
                             }
                         }
 
+                        function cyclePlayers() {
+                            if (players[currentPlayerIndex].playerStatus == "extraTurn") {
+                                players[currentPlayerIndex].playerStatus = "active";
+                                playTurn();
+                                return;
+                            }
+                            if (players[(currentPlayerIndex + 1) % numOfPlayers].playerStatus == "disabled") {
+                                players[(currentPlayerIndex + 1) % numOfPlayers].playerStatus = "active";
+                                currentPlayerIndex = (currentPlayerIndex + 2) % numOfPlayers;
+                                currentPlayer = players[currentPlayerIndex];
+                                return;
+                            } else {
+                                currentPlayerIndex = (currentPlayerIndex + 1) % numOfPlayers;
+                                currentPlayer = players[currentPlayerIndex];
+                            }
+                        }
+
                         function endGame(message) {
+
                             alert(message);
                             console.log(message);
                             gameEnded = true;

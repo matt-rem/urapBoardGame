@@ -261,6 +261,30 @@
                                         } else { selectedSquare = -1;  return; }
                                     }
 
+                                    if (phase == "phase-4") {
+                                        if (squareMarkers[squareIndex].squareType == "basic") {
+                                            eventSquareNumber++;
+                                            squareMarkers[squareIndex].squareType = "Lose_Turn" + " " + eventSquareNumber;
+                                            squareMarkers[squareIndex].text = String(squareMarkers[squareIndex].squareNumber + "\r" + squareMarkers[squareIndex].squareType);
+                                            return;
+                                        }
+                                        if (squareMarkers[squareIndex].squareType.includes("Lose_Turn")) {
+                                            deleteEventSquare(squareNumber);
+                                            return;
+                                        }
+                                    }
+                                    if (phase == "phase-5") {
+                                        if (squareMarkers[squareIndex].squareType == "basic") {
+                                            eventSquareNumber++;
+                                            squareMarkers[squareIndex].squareType = "Roll_Again" + " " + eventSquareNumber;
+                                            squareMarkers[squareIndex].text = String(squareMarkers[squareIndex].squareNumber + "\r" + squareMarkers[squareIndex].squareType);
+                                            return;
+                                        }
+                                        if (squareMarkers[squareIndex].squareType.includes("Roll_Again")) {
+                                            deleteEventSquare(squareNumber);
+                                            return;
+                                        }
+                                    }
                                 }
 
                                 function orient() {
@@ -284,6 +308,25 @@
                                     app.stage.removeChild(squareMarkers[squareIndex]);
                                     squareMarkers.splice(squareIndex, 1);
                                     currentSquare -= 1
+                                }
+
+                                function deleteEventSquare(squareNumber) {
+                                    squareIndex = squareNumber - 1;
+                                    var eventSquareIndex = parseInt(squareMarkers[squareIndex].squareType.split(" ").pop());
+                                    var eventSquareString = squareMarkers[squareIndex].squareType;
+                                    squareMarkers[squareIndex].squareType = "basic";
+                                    squareMarkers[squareIndex].text = String(squareMarkers[squareIndex].squareNumber + "\r" + squareMarkers[squareIndex].squareType);
+                                    eventSquareNumber--;
+                                    for (let i = 0; i < squareMarkers.length; i++) {
+                                        if (squareMarkers[i].squareType.includes(eventSquareString.split(" ")[0])) {
+                                            var clip = parseInt(squareMarkers[i].squareType.split(" ").pop());
+                                            if (clip > eventSquareIndex) {
+                                                var num = parseInt(clip) - 1;
+                                                squareMarkers[i].squareType = squareMarkers[i].squareType.replace(clip, num);
+                                                squareMarkers[i].text = String(squareMarkers[i].squareNumber + "\r" + squareMarkers[i].squareType);
+                                            }
+                                        }
+                                    }
                                 }
 
                                 function deletePair(squareNumber) {
@@ -334,6 +377,8 @@
                                 <button class="btn btn-primary" id="first-button" style="display: none" onclick="submit();">I've added all my squares!</button>
                                 <button class="btn btn-primary" id="second-button" style="display: none" onclick="submit();">I've added all my chutes!</button>
                                 <button class="btn btn-primary" id="third-button" style="display: none" onclick="submit();">I've added all my ladders!</button>
+                                <button class="btn btn-primary" id="fourth-button" style="display: none" onclick="submit();">I've added all "Lose a Turn" squares!</button>
+                                <button class="btn btn-primary" id="fifth-button" style="display: none" onclick="submit();">I've added all "Extra Roll" squares!</button>
                                 <button class="btn btn-primary" id="submit-button" style="display: none" onclick="submit();">Done!</button>
                             </div>
                         </div>
@@ -399,6 +444,20 @@
                                     }
                                     if (phase == "phase-3") {
                                         document.getElementById("third-button").remove();
+                                        document.getElementById("fourth-button").style.display = "initial";
+                                        phase = "phase-4";
+                                        eventSquareNumber = 0;
+                                        return;
+                                    }
+                                    if (phase == "phase-4") {
+                                        document.getElementById("fourth-button").remove();
+                                        document.getElementById("fifth-button").style.display = "initial";
+                                        phase = "phase-5";
+                                        eventSquareNumber = 0;
+                                        return;
+                                    }
+                                    if (phase == "phase-5") {
+                                        document.getElementById("fifth-button").remove();
                                         document.getElementById("submit-button").style.display = "initial";
                                         phase = "end";
                                         eventSquareNumber = 0;

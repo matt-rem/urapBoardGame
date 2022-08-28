@@ -122,7 +122,7 @@
                         let previousSquare = null;
                         let nextSquare = null;
                         for (let i = 0; i < Object.keys(coordinates).length; i++) {
-                            let newSquare = createSquare(coordinates[i]["x"], coordinates[i]["y"], null, null);
+                            let newSquare = createSquare(coordinates[i]["x"], coordinates[i]["y"], coordinates[i]["type"], null, null);
                             if (previousSquare) {
                                 newSquare.previousSquare = previousSquare;
                                 previousSquare.nextSquare = newSquare;
@@ -131,38 +131,38 @@
                             previousSquare = newSquare;
                         }
 
-                        function createSquare(coordinateX, coordinateY, previousSquare, nextSquare) {
+                        function createSquare(coordinateX, coordinateY, coordinateType, previousSquare, nextSquare) {
                             let square = {
                                 x: coordinateX,
                                 y: coordinateY,
-                                squareType: "basic",
+                                squareType: coordinateType,
                                 previousSquare: previousSquare,
                                 nextSquare: nextSquare,
                                 players: [],
-                                addPlayer: function(player) {
+                                addPlayer: function (player) {
                                     this.players.push(player);
                                     this.updatePlayerLocations();
                                 },
-                                removePlayer: function(player) {
+                                removePlayer: function (player) {
                                     const index = this.players.indexOf(player);
                                     if (index > -1) {
                                         this.players.splice(index, 1);
                                     }
                                     this.updatePlayerLocations();
                                 },
-                                updatePlayerLocations: function() {
-                                    if(this.players.length == 1) {
+                                updatePlayerLocations: function () {
+                                    if (this.players.length == 1) {
                                         this.players[0].setPosition(this.x, this.y)
                                         return;
                                     }
                                     let radius = 0
                                     if (this.nextSquare) {
-                                        radius = Math.sqrt(Math.pow(this.x - this.nextSquare.x, 2), (Math.pow(this.y - this.nextSquare.y, 2)))/8;
+                                        radius = Math.sqrt(Math.pow(this.x - this.nextSquare.x, 2), (Math.pow(this.y - this.nextSquare.y, 2))) / 8;
                                     } else {
-                                        radius = Math.sqrt(Math.pow(this.x - this.previousSquare.x, 2), (Math.pow(this.y - this.previousSquare.y, 2)))/8;
+                                        radius = Math.sqrt(Math.pow(this.x - this.previousSquare.x, 2), (Math.pow(this.y - this.previousSquare.y, 2))) / 8;
                                     }
                                     for (let i = 0; i < this.players.length; i++) {
-                                        radians = (2 * Math.PI/this.players.length) * i;
+                                        radians = (2 * Math.PI / this.players.length) * i;
                                         this.players[i].setPosition(this.x + radius * Math.cos(radians), this.y + radius * Math.sin(radians))
                                     }
                                 }
@@ -259,62 +259,111 @@
                             players.push(player);
                         }
 
-                        function createPlayer(playerSrc, startingX=0, startingY=0) {
-                            let player = {
-                                playerSrc: playerSrc,
-                                sprite: new PIXI.Sprite(playerSrc),
-                                positionX: startingX,
-                                positionY: startingY,
-                                currentSquare: null,
-                                priorSquare: null,
+                    function createPlayer(playerSrc, startingX = 0, startingY = 0) {
+                        let player = {
+                            playerSrc: playerSrc,
+                            sprite: new PIXI.Sprite(playerSrc),
+                            positionX: startingX,
+                            positionY: startingY,
+                            currentSquare: null,
+                            playerStatus: "active",
 
-                                setPosition: function(posX, posY) {
-                                    this.positionX = posX;
-                                    this.positionY = posY;
-                                    this.updateSprite();
-                                },
+                            setPosition: function (posX, posY) {
+                                this.positionX = posX;
+                                this.positionY = posY;
+                                this.updateSprite();
+                            },
 
-                                updateSprite: function() {
-                                    this.sprite.position.x = this.positionX;
-                                    this.sprite.position.y = this.positionY;
-                                    app.renderer.render(this.sprite);
-                                },
+                            updateSprite: function () {
+                                this.sprite.position.x = this.positionX;
+                                this.sprite.position.y = this.positionY;
+                                app.renderer.render(this.sprite);
+                            },
 
-                                moveTo: function(square) {
-                                    if(this.currentSquare) {
-                                        this.currentSquare.removePlayer(this);
+                            moveTo: function (square) {
+                                if (this.currentSquare) {
+                                    this.currentSquare.removePlayer(this);
+                                }
+                                square.addPlayer(this);
+                                this.currentSquare = square;
+                            },
+
+                            moveToNextSquare: function () {
+                                return this.moveTo(this.currentSquare.nextSquare)
+                            },
+
+                            moveToPreviousSquare: function () {
+                                return this.moveTo(this.currentSquare.previousSquare)
+                            },
+
+                            checkSquareEvent: function (stepNumber) {
+                                if (stepNumber == 0) {
+                                    if (this.currentSquare.squareType.includes("chute")) {
+                                        this.chuteMove();
                                     }
-                                    square.addPlayer(this);
-                                    this.currentSquare = square;
-                                    if (square.nextSquare == null) {
-                                        return "finished";
+                                    if (this.currentSquare.squareType.includes("ladder")) {
+                                        this.ladderMove();
                                     }
-                                },
-
-                                moveToNextSquare: function() {
-                                    return this.moveTo(this.currentSquare.nextSquare)
-                                },
-
-                                moveToPriorSquare: function () {
-                                    return this.moveTo(this.currentSquare.priorSquare)
-                                },
-
-                                checkSquareEvent: function () {
-                                    if (currentSquare.squareType == "chute") {
-                                        return;
+                                    if (this.currentSquare.squareType.includes("Lose_Turn")) {
+                                        this.Lose_TurnMove();
                                     }
-                                    if (currentSquare.squareType == "ladder") {
-                                        return;
-                                    } else {
-                                        return;
+                                    if (this.currentSquare.squareType.includes("Roll_Again")) {
+                                        this.Roll_AgainMove();
                                     }
                                 }
+                                if (this.currentSquare.nextSquare == null) {
+                                    return "finished";
+                                }
+                            },
+
+                            chuteMove: function () {
+                                if (this.currentSquare.squareType.includes("chute", "T")) {
+                                    targetSquare = this.currentSquare.squareType.replace("T", "B");
+                                    this.moveBackwardUntil(targetSquare);
+                                }
+                            },
+
+                            ladderMove: function () {
+                                if (this.currentSquare.squareType.includes("ladder", "B")) {
+                                    targetSquare = this.currentSquare.squareType.replace("B", "T");
+                                    this.moveForwardUntil(targetSquare);
+                                }
+                            },
+
+                            Lose_TurnMove: function () {
+                                this.playerStatus = "disabled";
+                                return;
+                            },
+
+                            Roll_AgainMove: function () {
+                                this.playerStatus = "extraTurn";
+                                return;
+                            },
+
+                            moveForwardUntil: function (squareType) {
+                                if (this.currentSquare.squareType != squareType) {
+                                    this.moveToNextSquare();
+                                    return this.moveForwardUntil(squareType);
+                                }
+                                return;
+                            },
+
+                            moveBackwardUntil: function (squareType) {
+                                if (this.currentSquare.squareType != squareType) {
+                                    this.moveToPreviousSquare();
+                                    return this.moveBackwardUntil(squareType);
+                                }
+                                return;
                             }
-                            player.sprite.anchor.x = .5;
-                            player.sprite.anchor.y = .5;
-                            app.stage.addChild(player.sprite)
-                            return player;
+
+
+
                         }
+                        player.sprite.anchor.x = .5;
+                        player.sprite.anchor.y = .5;
+                        app.stage.addChild(player.sprite)
+                        return player;
+                    }
 
                         //////////////////////
                         //main game loop
@@ -325,9 +374,10 @@
                         const playerMoveDelay = 200;
                         let disableTurn = false;
                         let gameEnded = false;
+                        let result = null;
 
-                        document.body.onkeyup = function(e){
-                            if(!(e.keyCode == 32)){
+                        document.body.onkeyup = function (e) {
+                            if (!(e.keyCode == 32)) {
                                 return;
                             }
                             if (disableTurn || gameEnded) {
@@ -340,24 +390,42 @@
                         function playTurn() {
                             let steps = dice.roll(takeStep);
                             function takeStep() {
-                                if (steps == 0) {
-                                    // currentPlayer.checkSquareEvent();
-                                    disableTurn = false;
-                                    currentPlayerIndex = (currentPlayerIndex + 1) % numOfPlayers;
-                                    currentPlayer = players[currentPlayerIndex];
-                                    return;
-                                }
-                                result = currentPlayer.moveToNextSquare();
                                 if (result == "finished") {
-                                    endGame("player " + (currentPlayerIndex + 1) + " wins!")
+                                    endGame("player " + (currentPlayerIndex + 1) + " wins!");
                                     return;
                                 }
-                                setTimeout(takeStep, playerMoveDelay)
+                                if (steps == 0) {
+                                    currentPlayer.checkSquareEvent(steps);
+                                    disableTurn = false;
+                                    cyclePlayers();
+                                    return;
+                                }
+                                currentPlayer.moveToNextSquare();
+                                setTimeout(takeStep, playerMoveDelay);
+                                result = currentPlayer.checkSquareEvent(steps);
                                 steps -= 1;
                             }
                         }
 
+                        function cyclePlayers() {
+                            if (players[currentPlayerIndex].playerStatus == "extraTurn") {
+                                players[currentPlayerIndex].playerStatus = "active";
+                                playTurn();
+                                return;
+                            }
+                            if (players[(currentPlayerIndex + 1) % numOfPlayers].playerStatus == "disabled") {
+                                players[(currentPlayerIndex + 1) % numOfPlayers].playerStatus = "active";
+                                currentPlayerIndex = (currentPlayerIndex + 2) % numOfPlayers;
+                                currentPlayer = players[currentPlayerIndex];
+                                return;
+                            } else {
+                                currentPlayerIndex = (currentPlayerIndex + 1) % numOfPlayers;
+                                currentPlayer = players[currentPlayerIndex];
+                            }
+                        }
+
                         function endGame(message) {
+
                             alert(message);
                             console.log(message);
                             gameEnded = true;

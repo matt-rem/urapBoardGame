@@ -1,0 +1,30 @@
+Notes for future developers on this website
+
+For debugging and testing the website, please refer to the github page for setting up the web app in localhost.
+
+Video demo of current website (June 2022): 
+
+In addition to the programming languages (Python, HTML, Javascript), the current website also uses the following technologies, a tutorial is included in case you need a recap or a brief introduction:
+- Python-flask for web hosting (https://flask.palletsprojects.com/en/2.1.x/quickstart/)
+- Jinja for templating, included with flask (https://jinja.palletsprojects.com/)
+- PIXI.JS as a rendering engine for the game (https://pixijs.com/)
+- SQlite and MySQL for data storage and retrieval (https://www.sqlite.org/index.html)
+
+Feel free to contact me at cyrushung822@berkeley.edu for any questions on the code
+
+Future features to add:
+- Allowing users to add chutes and ladders
+- Adding roll-again and skip-turn tiles
+- Adding feature where, upon an user uploads a new board and marks the coordinates of its squares, those coordinates are saved and can be used by future users so they don't have to go through the process of clicking the squares again.
+- Adding camera zoom features (this can be done with PIXI)
+- Adding texts and signs feature when user lands on specific squares
+- Adding functionality to export a game as a CSV/Google sheets/Excel document, and inversely for the website to import a CSV document to create a game.
+
+Things to do before deploying:
+- Sanitize all inputs
+- Limit size/length of user inputs, and make sure inputs that can cause errors are avoided (ex. currently, adding only 1 dice side image causes an infinite loop and crash due to how the rolling animation works.)
+- Add warnings and error messages to interfaces (ex. warning for adding too little square coordinates, dice side images, etc.)
+- Add functionality (admin accounts or an interface) to remove and delete inappropriate content
+- Ensure user sessions are unique for each user (setting the key)
+
+For deploying this application to the hygiene heroes website, refer to this article. The website should already be capable of hosting web apps: https://www.ocf.berkeley.edu/docs/services/webapps/python/

@@ -22,7 +22,7 @@ Open the Terminal application on your computer.
 
 Check your current directory by typing 
 
-For the next step, open the Terminal application on your computer. 
+For the next step, open Terminal/Command Prompt on your computer. 
 
 Check your current directory by typing:
 
@@ -48,6 +48,11 @@ Now you should be in the correct folder for debugging and hosting the website.
 To host the website on your local computer, type the following command in your terminal (make sure you're in the urapBoardGame-main folder first!):
 
 ```
+python application.py
+```
+If that doesn't work, try
+
+```
 python3 application.py
 ```
 
@@ -67,5 +72,6 @@ The terminal should now show something similar to:
 
 Copy the link (in this case http://127.0.0.1:5000/) into your browser. By default, this should show the "home.html" page located within the templates folder.
 
+## Creating a Board Game
 
 

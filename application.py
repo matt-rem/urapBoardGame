@@ -42,7 +42,6 @@ def home():
     # List of relative paths is then use by flask templating engine to create scrolling series of existing board images that user can choose.
     finished_games = list(db.execute('''SELECT * FROM saved_games'''))
     saved_games_dict = {}
-    print(list(finished_games))
     for i in range(len(finished_games)):
         game = {}
         game["index"] = finished_games[i][0]
@@ -66,7 +65,7 @@ def setup_play():
         session["title"] = row[1]
         session["creator"] = row[2]
         session["board_path"] = row[3]
-        session["square_data"] = json.loads(row[4])
+        session["square_coordinates"] = json.loads(row[4])
         session["game_pieces"] = json.loads(row[5])
         session["dice_sides"] = json.loads(row[6])
     return redirect("/play")
@@ -252,6 +251,11 @@ def playtest_game():
 
 @app.route("/play")
 def play():
+    '''
+    Takes the currently requested game from session (chosen from home page), creates and serves webpage with the game that 
+    the user chose. 
+
+    '''
     sorted_game_pieces = sorted(session["game_pieces"].items(), key=lambda x: int(x[0]))
     sorted_dice_sides = sorted(session["dice_sides"].items(), key=lambda x: int(x[0]))
     return render_template("play.html",
@@ -264,6 +268,10 @@ def play():
 
 @app.route("/save", methods=['POST'])
 def save_game():
+    '''
+    Finishes the game creation process by saving all information in session to the database, creating a new entry
+    that other users can then select and play from the home page. 
+    '''
     game_title = request.form.get("gameTitle")
     name = request.form.get("name")
     board_path = session.get('board_path', None)
@@ -279,10 +287,6 @@ def save_game():
     db.close()
     print("hmm")
     return redirect('/')
-
-@app.route("/test", methods=['GET', 'POST'])
-def test_website():
-    return render_template('PixiJStest.html')
 
 if __name__ == '__main__':
     app.debug = True

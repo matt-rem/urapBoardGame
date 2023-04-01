@@ -54,11 +54,13 @@
                     <div class="container-fluid mb-4 text-center">
                         <h1 class="mt-4">{{ title }}</h1>
                         <h3 class="mt-4">by {{ creator }}</h3>
+                        <button id="rollBtn">Roll!</button>
                         <div class="container-fluid d-flex mb-4 flex-row justify-content-center align-items-center">
                             <div class="game-container" id="game">
                             </div>
                         </div>
                     </div>
+                    
                     <script>
                         const diceRollAnimationTimes = 6;
                         const rollAnimationDelay = 250;
@@ -78,6 +80,8 @@
 
                         let board = new PIXI.Sprite(board_texture)
                         board.interactive = true;
+
+
 
                         board.anchor.x = .5;
                         board.anchor.y = .5;
@@ -111,9 +115,17 @@
                             app.renderer.view.style.height = h + "px";
                         }
 
+                        //function onClick(event) {
+                            // Get position of user's click
+                            //\let xPos = event.data.global.x;
+                            //let yPos = event.data.global.y;
+                            //board_texture.on('pointerdown', (event) => { alert('clicked!'); });
+                        //}
+
                         window.onresize = resize;
-                </script>
-                <script>
+                    </script>
+
+                    <script>
                         //////////////////////
                         //create all squares
                         //////////////////////
@@ -176,6 +188,7 @@
 
                         {% for diceside in dice_sides %}
                         var side = PIXI.Texture.from("{{ diceside }}")
+                        side.interactive = false
                         dice_images.push(side)
                         {% endfor %}
                         console.log(dice_images)
@@ -191,6 +204,7 @@
                                 positionY: positionY,
                                 rolling: false,
                                 roll: function (callback) {
+                                    //console.log("called roll")
                                     if (this.rolling) {
                                         return;
                                     }
@@ -244,6 +258,7 @@
 
                         {% for gamePiece in game_pieces %}
                         piece = PIXI.Texture.from("{{ gamePiece }}")
+                        piece.interactive = false
                         playerSrcs.push(piece)
                         {% endfor %}
 
@@ -387,25 +402,40 @@
                             disableTurn = true;
                         }
 
+                        function onClick() {
+                            if (disableTurn || gameEnded) {
+                                return;
+                            }
+                            playTurn()
+                            disableTurn = true;
+                        }
+                        // 1,2 4,2
                         function playTurn() {
+                            //console.log("1")
                             let steps = dice.roll(takeStep);
+                            //console.log("2")
                             function takeStep() {
+                                //console.log("3")
                                 if (result == "finished") {
                                     endGame("player " + (currentPlayerIndex + 1) + " wins!");
                                     return;
                                 }
                                 if (steps == 0) {
+                                    //console.log("4")
                                     currentPlayer.checkSquareEvent(steps);
                                     disableTurn = false;
                                     cyclePlayers();
                                     return;
                                 }
+                                //console.log("5")
                                 currentPlayer.moveToNextSquare();
                                 setTimeout(takeStep, playerMoveDelay);
                                 result = currentPlayer.checkSquareEvent(steps);
                                 steps -= 1;
+                                //console.log("6")
                             }
                         }
+
 
                         function cyclePlayers() {
                             if (players[currentPlayerIndex].playerStatus == "extraTurn") {
@@ -430,7 +460,17 @@
                             console.log(message);
                             gameEnded = true;
                         }
-                </script>
+                        document.getElementById("rollBtn").addEventListener("click", function () {
+                            if (disableTurn || gameEnded) {
+                                return;
+                            }
+                            playTurn()
+                            disableTurn = true;
+                        });
+                        board.on('click', onClick)
+
+                    </script>
+
                 </div>
             </div>
         </div>

@@ -11,6 +11,10 @@ from flask import Flask, flash, request, redirect, url_for, render_template, ses
 from flask_session import Session
 from werkzeug.utils import secure_filename
 import re
+from flask import send_file
+from zipfile import ZipFile
+from io import BytesIO
+import os, glob
 
 # Paths to each folder for storing board game element images and data
 UPLOAD_FOLDER_BOARD = 'static/assets/board_images'
@@ -42,7 +46,6 @@ def home():
     # List of relative paths is then use by flask templating engine to create scrolling series of existing board images that user can choose.
     finished_games = list(db.execute('''SELECT * FROM saved_games'''))
     saved_games_dict = {}
-    print(list(finished_games))
     for i in range(len(finished_games)):
         game = {}
         game["index"] = finished_games[i][0]
@@ -66,7 +69,7 @@ def setup_play():
         session["title"] = row[1]
         session["creator"] = row[2]
         session["board_path"] = row[3]
-        session["square_data"] = json.loads(row[4])
+        session["square_coordinates"] = json.loads(row[4])
         session["game_pieces"] = json.loads(row[5])
         session["dice_sides"] = json.loads(row[6])
     return redirect("/play")
@@ -122,14 +125,11 @@ def select_board():
 def upload_pieces():
     '''
     Handles game piece and dice side uploads from users.
-
     Functions similarly to a combination of select_board and upload_board, except it has to handle an arbitrary number of images 
     that can be a game piece or a dice side AND there may be a combination of uploaded images and selected pre-uploaded images. 
-
     The logic is split into 2 parts: first, handle all requests to use pre-uploaded images (which are stored simply as key-value pairs
     where the key is either "diceN" or "playerN" where N is the dice side or player number). Depending on if it's a dice key or a player key,
     the string is added to the list of gamepieces or dice sides in the user's session (so that the board game can use it later)
-
     Second, it handles all requests to upload new game pieces or dice sides. Using the same key-value pair logic from above, it 
     first uploads the images themselves to the hosting server's respective folders, adds the names to the database, and lastly adds the 
     image paths to the user's sessions (exact same way as above) for use in the final board game later.
@@ -221,7 +221,6 @@ def setup_finished():
 def gamepiece_upload():
     '''
     Creates the webpage for the Upload Game Elements page
-
     Takes all names of pre-uploaded game peices and dice sides in the database and passes it into the Flask template so Jinja can create a list of
     pre-uploaded images in the bottom of the page. The user is then able to drag these images into the upload section to use pre-uploaded 
     images rather than having to re-upload or constantly use new images.
@@ -236,7 +235,6 @@ def gamepiece_upload():
 def playtest_game():
     '''
     Creates the webpage for the final, finished board game (playtest)
-
     Passes in all information currently stored in the user's session (that should have been filled out in previous phases either by
     uploading the user's images or selecting pre-existing images) so Jinja can integrate it into the JavaScript game engine.
     '''
@@ -252,6 +250,10 @@ def playtest_game():
 
 @app.route("/play")
 def play():
+    '''
+    Takes the currently requested game from session (chosen from home page), creates and serves webpage with the game that 
+    the user chose. 
+    '''
     sorted_game_pieces = sorted(session["game_pieces"].items(), key=lambda x: int(x[0]))
     sorted_dice_sides = sorted(session["dice_sides"].items(), key=lambda x: int(x[0]))
     return render_template("play.html",
@@ -262,8 +264,19 @@ def play():
                                 game_pieces=[x[1] for x in sorted_game_pieces], 
                                 dice_sides=[x[1] for x in sorted_dice_sides])
 
+
+@app.route("/download")
+def download():
+   path = "static/assets/dice_sides/dice_1.png"
+   return send_file(path, as_attachment=True)
+
+
 @app.route("/save", methods=['POST'])
 def save_game():
+    '''
+    Finishes the game creation process by saving all information in session to the database, creating a new entry
+    that other users can then select and play from the home page. 
+    '''
     game_title = request.form.get("gameTitle")
     name = request.form.get("name")
     board_path = session.get('board_path', None)
@@ -279,10 +292,6 @@ def save_game():
     db.close()
     print("hmm")
     return redirect('/')
-
-@app.route("/test", methods=['GET', 'POST'])
-def test_website():
-    return render_template('PixiJStest.html')
 
 if __name__ == '__main__':
     app.debug = True

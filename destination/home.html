@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>Hygiene Heroes Board Game Engine</title>
+        <!-- Favicon-->
+        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet" />
+        <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    </head>
+    <body>
+        <div class="d-flex" id="wrapper">
+            <!-- Sidebar-->
+            <div class="border-end bg-white" id="sidebar-wrapper">
+                <a href="/" style="color: #000000; text-decoration: none;"><div class="sidebar-heading border-bottom bg-light">urapBoardGame</div></a>
+                <div class="list-group list-group-flush">
+                    <a class="list-group-item list-group-item-dark p-3 text-muted" href="/board_select">1. Upload Image</a>
+                    <a class="list-group-item list-group-item-dark p-3 text-muted" href="/setup_board">2. Setup Board</a>
+                    <a class="list-group-item list-group-item-dark p-3 text-muted" href="/gamepiece">3. Upload Game Elements</a>
+                    <a class="list-group-item list-group-item-dark p-3 text-muted" href="/game">4. Final Touches</a>
+                </div>
+            </div>
+            <!-- Page content wrapper-->
+            <div id="page-content-wrapper">
+                <!-- Top navigation-->
+                <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+                    <div class="container-fluid">
+                        <button class="btn btn-primary" id="sidebarToggle">Toggle</button>
+                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+                        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                            <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
+                                <li class="nav-item active"><a class="nav-link" href="/">Home</a></li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Account</a>
+                                    <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                        <a class="dropdown-item" href="#!">My Account</a>
+                                        <a class="dropdown-item" href="#!">Logout</a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item" href="#!">Register</a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </nav>
+                <!-- Page content-->
+                <div class="container-fluid col">
+                    <div class="my-3 row container-fluid align-items-center">
+                        <h2 class="text-center">Welcome to the Hygiene Heroes Board Game Creator!</h2>
+                    </div>
+                    <div class="row container-fluid align-items-center">
+                        <p class="text-center">Click the button below to begin creating your own board game in 4 easy steps:</p>
+                    </div>
+                    <div class="my-3 px-3 py-3 align-items-center text-center ">
+                        <button type="button" class="btn btn-primary btn-lg" onclick="location.href = '/board_select'">Start</button>
+                    </div>
+
+                    <div class="my-3 row container-fluid align-items-center">
+                        <h4 class="text-center">Or, try one of the games that others have created from below!</h4>
+                    </div>
+
+                    <div class="my-3 row container-fluid align-items-center">
+                        <table class="table text-center justify-content-center">
+                            <thead>
+                              <tr>
+                                <th scope="col">Title</th>
+                                <th scope="col">Creator</th>
+                                <th scope="col">Board Preview</th>
+                                <th scope="col"></th>
+                              </tr>
+                            </thead>
+                            <tbody id="savedGamesBody">
+                            </tbody>
+                          </table>
+                    </div>
+                    <script>
+                        const saved_games = {{ saved_game_data | tojson }}
+                        for (let i = 0; i < Object.keys(saved_games).length; i++) {
+                            tBody = document.getElementById("savedGamesBody");
+                            var newRow = tBody.insertRow();
+                            newRow.setAttribute("style","vertical-align: middle")
+
+                            var cell0 = document.createElement('th');
+                            cell0.innerHTML = saved_games[i]["title"]
+                            newRow.appendChild(cell0);
+
+                            var cell1 = newRow.insertCell();
+                            cell1.innerHTML = saved_games[i]["creator"]
+                            newRow.appendChild(cell1);
+
+                            var cell2 = newRow.insertCell();
+                            img = document.createElement("img")
+                            img.setAttribute("src", saved_games[i]["board_path"])
+                            img.setAttribute("style", "width:20%")
+                            cell2.appendChild(img);
+                            
+                            var cell3 = newRow.insertCell();
+                            button = document.createElement("button")
+                            button.setAttribute("type", "button")
+                            button.setAttribute("class", "btn btn-primary")
+                            button.onclick = () => {$.post('/setup_play', {'index': saved_games[i]["index"]}, () => {window.location.href = '/play'})}
+                            button.innerHTML = "Play!"
+                            cell3.appendChild(button)
+                        }
+                    </script>
+                </div>
+            </div>
+        </div>
+        <!-- Bootstrap core JS-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Core theme JS-->
+        <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+    </body>
+</html>

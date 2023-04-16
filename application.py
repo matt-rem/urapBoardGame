@@ -7,7 +7,7 @@ import json
 import os
 import sqlite3
 from flask import Flask
-from flask import Flask, flash, request, redirect, url_for, render_template, session
+from flask import Flask, flash, request, redirect, url_for, render_template, session, send_from_directory
 from flask_session import Session
 from werkzeug.utils import secure_filename
 import re
@@ -15,6 +15,7 @@ from flask import send_file
 from zipfile import ZipFile
 from io import BytesIO
 import os, glob
+import shutil
 
 # Paths to each folder for storing board game element images and data
 UPLOAD_FOLDER_BOARD = 'static/assets/board_images'
@@ -269,6 +270,31 @@ def play():
 def download():
    path = "static/assets/dice_sides/dice_1.png"
    return send_file(path, as_attachment=True)
+
+@app.route("/download_folders")
+def download_folders():
+    asset_path = 'static/assets'
+    css_path = 'static/css'
+    js_path = 'static/js'
+    templates_path = 'templates'
+    output_folder = 'destination'
+    zip_filename = 'downloaded_folders.zip'
+
+    # Create the output folder if it doesn't exist
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+
+    # Copy the contents of folder1 and folder2 into the output folder
+    for folder_path in [asset_path, css_path, js_path, templates_path]:
+        folder_name = os.path.basename(folder_path)
+        output_subfolder = os.path.join(output_folder, folder_name)
+        shutil.copytree(folder_path, output_subfolder)
+
+    # Compress the output folder into a zip file
+    shutil.make_archive(output_folder, 'zip', output_folder)
+
+    # Download the zip file
+    return send_from_directory(directory=output_folder, filename=zip_filename, as_attachment=True)
 
 
 @app.route("/save", methods=['POST'])

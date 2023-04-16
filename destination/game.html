@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>Hygiene Heroes Board Game Engine</title>
+    <!-- Favicon-->
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet" />
+    <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet" />
+    <script src="https://pixijs.download/release/pixi.js"></script>
+</head>
+<body>
+    <div class="d-flex" id="wrapper">
+        <!-- Sidebar-->
+        <div class="border-end bg-white" id="sidebar-wrapper">
+            <a href="/" style="color: #000000; text-decoration: none;"><div class="sidebar-heading border-bottom bg-light">urapBoardGame</div></a>
+            <div class="list-group list-group-flush">
+                <a class="list-group-item list-group-item-action list-group-item-light p-3 text-dark" href="/board_select">1. Upload Image</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-3 text-dark" href="/setup_board">2. Setup Board</a>
+                <a class="list-group-item list-group-item-action  list-group-item-light p-3 text-dark" href="/gamepiece">3. Upload Game Elements</a>
+                <a class="list-group-item list-group-item-action  list-group-item-light p-3 text-dark" href="/game">4. Final Touches</a>
+            </div>
+        </div>
+        <!-- Page content wrapper-->
+        <div id="page-content-wrapper">
+            <!-- Top navigation-->
+            <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+                <div class="container-fluid">
+                    <button class="btn btn-primary" id="sidebarToggle">Toggle</button>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
+                            <li class="nav-item active"><a class="nav-link" href="/">Home</a></li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Account</a>
+                                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                    <a class="dropdown-item" href="#!">My Account</a>
+                                    <a class="dropdown-item" href="#!">Logout</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="#!">Register</a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+            <!-- Page content-->
+            <div class="container-fluid d-flex flex-column justify-content-between">
+                <div class="container-fluid d-flex flex-row justify-content-between">
+                    <div class="container-fluid mb-4 text-center">
+                        <h1 class="mt-4">Playtest your game!</h1>
+                        <h6 class="mt-4">press space to play</h6>
+                        <div class="container-fluid d-flex mb-4 flex-row justify-content-center align-items-center">
+                            <div class="game-container" id="game">
+                            </div>
+                        </div>
+                        <div style="margin-top: 5%; padding-left:25%; padding-right:25%;">
+                            <form action="/save" method="POST">
+                                <div class="form-group" style="margin-top:2%">
+                                    <label for="gameTitle">Game Title</label>
+                                    <input type="text" class="form-control" id="gameTitle" name="gameTitle" placeholder="Enter Your Game's title!">
+                                </div>
+                                <div class="form-group" style="margin-top:2%">
+                                    <label for="name">Your Name</label>
+                                    <input type="text" class="form-control" id="name" name="name" placeholder="Enter Your name!">
+                                </div>
+                                <button type="submit" class="btn btn-primary" style="margin-top:2%">Save Game!</button>
+                            </form>
+                        </div>
+                        <script>
+                                const diceRollAnimationTimes = 6;
+                                const rollAnimationDelay = 250;
+
+                                let gameContainer = document.getElementById("game");
+                                let app = new PIXI.Application();
+                                document.getElementById('game').appendChild(app.view)
+
+                                ///////////////////////////////////
+                                //setup board and resizing function
+                                ///////////////////////////////////
+                                var board_texture = PIXI.Texture.from("{{ board }}");
+                                board_texture.on('update', () => {
+                                    scaleTo(board, app.renderer.width, app.renderer.height);
+                                    app.renderer.render(app.stage);
+                                    });
+
+                                let board = new PIXI.Sprite(board_texture)
+                                board.interactive = true;
+
+                                board.anchor.x = .5;
+                                board.anchor.y = .5;
+                                board.position.x = app.renderer.width/2;
+                                board.position.y = app.renderer.height/2;
+                                board.zOrder = -1000
+                                app.stage.addChild(board)
+                                resize();
+                                scaleTo(board, app.renderer.width, app.renderer.height);
+
+                                function scaleTo(target, width, height) {
+                                    if (target.width > target.height) {
+                                        var ratio = width / target.width;
+                                    } else {
+                                        var ratio = height / target.height;
+                                    }
+                                    target.scale.x *= ratio
+                                    target.scale.y *= ratio
+                                }
+
+                                function resize() {
+                                    let ratio = gameContainer.clientWidth / gameContainer.clientHeight;
+                                    if (gameContainer.clientWidth / gameContainer.clientHeight >= ratio) {
+                                            var w = gameContainer.clientHeight * ratio;
+                                            var h = gameContainer.clientHeight;
+                                        } else {
+                                            var w = gameContainer.clientWidth;
+                                            var h = gameContainer.clientWidth / ratio;
+                                        }
+                                    app.renderer.view.style.width = w + "px";
+                                    app.renderer.view.style.height = h + "px";
+                                }
+
+                                window.onresize = resize;
+                        </script>
+                        <script>
+                                //////////////////////
+                                //create all squares
+                                //////////////////////
+                                const coordinates = {{ square_data | tojson }}
+                                let squares = []
+                                let previousSquare = null;
+                                let nextSquare = null;
+                                for (let i = 0; i < Object.keys(coordinates).length; i++) {
+                                    let newSquare = createSquare(coordinates[i]["x"], coordinates[i]["y"], coordinates[i]["type"], null, null);
+                                    if (previousSquare) {
+                                        newSquare.previousSquare = previousSquare;
+                                        previousSquare.nextSquare = newSquare;
+                                    }
+                                    squares.push(newSquare);
+                                    previousSquare = newSquare;
+                                }
+
+                                function createSquare(coordinateX, coordinateY, coordinateType, previousSquare, nextSquare) {
+                                    let square = {
+                                        x: coordinateX,
+                                        y: coordinateY,
+                                        squareType: coordinateType,
+                                        previousSquare: previousSquare,
+                                        nextSquare: nextSquare,
+                                        players: [],
+                                        addPlayer: function(player) {
+                                            this.players.push(player);
+                                            this.updatePlayerLocations();
+                                        },
+                                        removePlayer: function(player) {
+                                            const index = this.players.indexOf(player);
+                                            if (index > -1) {
+                                                this.players.splice(index, 1);
+                                            }
+                                            this.updatePlayerLocations();
+                                        },
+                                        updatePlayerLocations: function() {
+                                            if(this.players.length == 1) {
+                                                this.players[0].setPosition(this.x, this.y)
+                                                return;
+                                            }
+                                            let radius = 0
+                                            if (this.nextSquare) {
+                                                radius = Math.sqrt(Math.pow(this.x - this.nextSquare.x, 2), (Math.pow(this.y - this.nextSquare.y, 2)))/8;
+                                            } else {
+                                                radius = Math.sqrt(Math.pow(this.x - this.previousSquare.x, 2), (Math.pow(this.y - this.previousSquare.y, 2)))/8;
+                                            }
+                                            for (let i = 0; i < this.players.length; i++) {
+                                                radians = (2 * Math.PI/this.players.length) * i;
+                                                this.players[i].setPosition(this.x + radius * Math.cos(radians), this.y + radius * Math.sin(radians))
+                                            }
+                                        }
+                                    }
+                                    return square
+                                }
+                                //////////////////////
+                                //create dice
+                                //////////////////////
+                                let dice_images = []
+
+                                {% for diceside in dice_sides %}
+                                var side = PIXI.Texture.from("{{ diceside }}")
+                                dice_images.push(side)
+                                {% endfor %}
+                                console.log(dice_images)
+                                let dice = createDice(dice_images, app.renderer.width * 0.1, app.renderer.height * 0.8)
+
+                                function createDice(sides, positionX=0, positionY=0) {
+                                    let dice = {
+                                        sideSrcs: sides,
+                                        currentValue: 1,
+                                        currentSide: sides[0],
+                                        diceSprite: new PIXI.Sprite(this.currentSide),
+                                        positionX: positionX,
+                                        positionY: positionY,
+                                        rolling: false,
+                                        roll: function (callback) {
+                                            if (this.rolling) {
+                                                return;
+                                            }
+                                            let trueRollValue = Math.floor(Math.random() * this.sideSrcs.length + 1);
+                                            this.currentValue = trueRollValue;
+                                            this.rolling = true;
+
+                                            let parent = this;
+                                            let timesLeft = diceRollAnimationTimes;
+                                            rollAnimation();
+                                            function rollAnimation() {
+                                                if (timesLeft < 2) {
+                                                    parent.rolling = false;
+                                                    parent.currentSide = parent.sideSrcs[parent.currentValue - 1];
+                                                    parent.updateDice();
+                                                    callback();
+                                                    return;
+                                                }
+                                                let maxDiceValue = parent.sideSrcs.length;
+                                                let simulatedRoll =  Math.floor((Math.random() * maxDiceValue) + 1);
+                                                while (parent.currentSide == parent.sideSrcs[simulatedRoll - 1]) {
+                                                    simulatedRoll =  Math.floor((Math.random() * maxDiceValue) + 1)
+                                                }
+                                                parent.currentSide = parent.sideSrcs[simulatedRoll - 1];
+                                                parent.updateDice();
+                                                timesLeft -= 1
+                                                setTimeout(rollAnimation, rollAnimationDelay);
+                                            }
+                                            return trueRollValue;
+                                        },
+                                        updateDice: function () {
+                                            this.diceSprite.texture = this.currentSide;
+                                            this.diceSprite.anchor.x = .5;
+                                            this.diceSprite.anchor.y = .5;
+                                            this.diceSprite.position.x = this.positionX;
+                                            this.diceSprite.position.y = this.positionY;
+                                            this.diceSprite.zOrder = 1000;
+                                            app.renderer.render(this.diceSprite);
+                                        }
+                                    }
+                                    app.stage.addChild(dice.diceSprite)
+                                    return dice;
+                                }
+
+                                //////////////////////
+                                //create all players
+                                //////////////////////
+                                let playerSrcs = []
+                                let players = []
+                                let piece = null;
+
+                                {% for gamePiece in game_pieces %}
+                                piece = PIXI.Texture.from("{{ gamePiece }}")
+                                playerSrcs.push(piece)
+                                {% endfor %}
+
+                                // let sprite = new PIXI.Sprite(piece);
+                                // sprite.position.x = app.renderer.width/2;
+                                // sprite.position.y = app.renderer.height/2;
+                                // app.stage.addChild(sprite)
+                                // app.renderer.render(sprite);
+
+                                for (const piece of playerSrcs) {
+                                    player = createPlayer(piece);
+                                    player.moveTo(squares[0]);
+                                    players.push(player);
+                                }
+
+                                function createPlayer(playerSrc, startingX=0, startingY=0) {
+                                    let player = {
+                                        playerSrc: playerSrc,
+                                        sprite: new PIXI.Sprite(playerSrc),
+                                        positionX: startingX,
+                                        positionY: startingY,
+                                        currentSquare: null,
+                                        playerStatus: "active",
+
+                                        setPosition: function (posX, posY) {
+                                            this.positionX = posX;
+                                            this.positionY = posY;
+                                            this.updateSprite();
+                                        },
+
+                                        updateSprite: function () {
+                                            this.sprite.position.x = this.positionX;
+                                            this.sprite.position.y = this.positionY;
+                                            app.renderer.render(this.sprite);
+                                        },
+
+                                        moveTo: function (square) {
+                                            if (this.currentSquare) {
+                                                this.currentSquare.removePlayer(this);
+                                            }
+                                            square.addPlayer(this);
+                                            this.currentSquare = square;
+                                        },
+
+                                        moveToNextSquare: function () {
+                                            return this.moveTo(this.currentSquare.nextSquare)
+                                        },
+
+                                        moveToPreviousSquare: function () {
+                                            return this.moveTo(this.currentSquare.previousSquare)
+                                        },
+
+                                        checkSquareEvent: function (stepNumber) {
+                                            if (stepNumber == 0) {
+                                                if(this.currentSquare.squareType.includes("chute")) {
+                                                    this.chuteMove();
+                                                }
+                                                if (this.currentSquare.squareType.includes("ladder")) {
+                                                    this.ladderMove();
+                                                }
+                                                if (this.currentSquare.squareType.includes("Lose_Turn")) {
+                                                    this.Lose_TurnMove();
+                                                }
+                                                if (this.currentSquare.squareType.includes("Roll_Again")) {
+                                                    this.Roll_AgainMove();
+                                                }
+                                            }
+                                            if (this.currentSquare.nextSquare == null) {
+                                                return "finished";
+                                            }
+                                        },
+
+                                        chuteMove: function () {
+                                            if (this.currentSquare.squareType.includes("chute","T")) {
+                                                targetSquare = this.currentSquare.squareType.replace("T","B");
+                                                this.moveBackwardUntil(targetSquare);
+                                            }  
+                                        },
+
+                                        ladderMove: function () {
+                                            if (this.currentSquare.squareType.includes("ladder","B")) {
+                                                targetSquare = this.currentSquare.squareType.replace("B","T");
+                                                this.moveForwardUntil(targetSquare);
+                                            }
+                                        },
+
+                                        Lose_TurnMove: function () {
+                                            this.playerStatus = "disabled";
+                                            return;
+                                        },
+
+                                        Roll_AgainMove: function () {
+                                            this.playerStatus = "extraTurn";
+                                            return;
+                                        },
+
+                                        moveForwardUntil: function (squareType) {
+                                            if (this.currentSquare.squareType != squareType) {
+                                                this.moveToNextSquare();
+                                                return this.moveForwardUntil(squareType);
+                                            }
+                                            return;
+                                        },
+
+                                        moveBackwardUntil: function (squareType) {
+                                            if (this.currentSquare.squareType != squareType) {
+                                                this.moveToPreviousSquare();
+                                                return this.moveBackwardUntil(squareType);
+                                            }
+                                            return;
+                                        }
+                                    }
+                                    player.sprite.anchor.x = .5;
+                                    player.sprite.anchor.y = .5;
+                                    app.stage.addChild(player.sprite)
+                                    return player;
+                                }
+
+                                //////////////////////
+                                //main game loop
+                                //////////////////////
+                                const numOfPlayers = players.length;
+                                let currentPlayerIndex = 0
+                                let currentPlayer = players[currentPlayerIndex];
+                                const playerMoveDelay = 200;
+                                let disableTurn = false;
+                                let gameEnded = false;
+                                let result = null;
+
+                                document.body.onkeyup = function(e){
+                                    if(!(e.keyCode == 32)){
+                                        return;
+                                    }
+                                    if (disableTurn || gameEnded) {
+                                        return
+                                    }
+                                    playTurn();
+                                    disableTurn = true;
+                                }
+
+                                function playTurn() {
+                                    let steps = dice.roll(takeStep);
+                                    function takeStep() {
+                                        if (result == "finished") {
+                                            endGame("player " + (currentPlayerIndex + 1) + " wins!");
+                                            return;
+                                        }
+                                        if (steps == 0) {
+                                            currentPlayer.checkSquareEvent(steps);
+                                            disableTurn = false;
+                                            cyclePlayers();
+                                            return;
+                                        }
+                                        currentPlayer.moveToNextSquare();
+                                        setTimeout(takeStep, playerMoveDelay);
+                                        result = currentPlayer.checkSquareEvent(steps);
+                                        steps -= 1;
+                                    }
+                                }
+
+                                function cyclePlayers() {
+                                    if (players[currentPlayerIndex].playerStatus == "extraTurn") {
+                                        players[currentPlayerIndex].playerStatus = "active";
+                                        playTurn();
+                                        return;
+                                    }
+                                    if (players[(currentPlayerIndex + 1) % numOfPlayers].playerStatus == "disabled") {
+                                        players[(currentPlayerIndex + 1) % numOfPlayers].playerStatus = "active";
+                                        currentPlayerIndex = (currentPlayerIndex + 2) % numOfPlayers;
+                                        currentPlayer = players[currentPlayerIndex];
+                                        return;
+                                    } else {
+                                        currentPlayerIndex = (currentPlayerIndex + 1) % numOfPlayers;
+                                        currentPlayer = players[currentPlayerIndex];
+                                    }    
+                                }
+
+                                function endGame(message) {
+
+                                    alert(message);
+                                    console.log(message);
+                                    gameEnded = true;
+                                }
+                        </script>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Bootstrap core JS-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Core theme JS-->
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+</body>
+</html>

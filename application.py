@@ -271,31 +271,34 @@ def download():
    path = "static/assets/dice_sides/dice_1.png"
    return send_file(path, as_attachment=True)
 
-@app.route("/download_folders")
+@app.route("/download_folders", methods=['GET'])
 def download_folders():
-    asset_path = 'static/assets'
-    css_path = 'static/css'
-    js_path = 'static/js'
-    templates_path = 'templates'
-    output_folder = 'destination'
-    zip_filename = 'downloaded_folders.zip'
+    current_path  = os.getcwd() 
+    destination_path = 'destination'
 
-    # Create the output folder if it doesn't exist
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
+    if os.path.exists(destination_path):
+        shutil.rmtree(destination_path)
+    if os.path.exists('downloads.zip'):
+        shutil.rmtree('downloads.zip')
 
-    # Copy the contents of folder1 and folder2 into the output folder
-    for folder_path in [asset_path, css_path, js_path, templates_path]:
-        folder_name = os.path.basename(folder_path)
-        output_subfolder = os.path.join(output_folder, folder_name)
-        shutil.copytree(folder_path, output_subfolder)
-
+    # Recursively copy all files from the source to the destination
+    for root, dirs, files in os.walk(current_path):
+        # Create corresponding subdirectories in the destination
+        for dir in dirs:
+            source_dir = os.path.join(root, dir)
+            dest_dir = source_dir.replace(current_path, destination_path)
+            os.makedirs(dest_dir, exist_ok=True)
+    
+        # Copy all files from the source to the destination
+        for file in files:
+            source_file = os.path.join(root, file)
+            dest_file = source_file.replace(current_path, destination_path)
+            shutil.copy(source_file, dest_file)
+    
     # Compress the output folder into a zip file
-    shutil.make_archive(output_folder, 'zip', output_folder)
+    shutil.make_archive(destination_path, 'zip', destination_path)
 
-    # Download the zip file
-    return send_from_directory(directory=output_folder, filename=zip_filename, as_attachment=True)
-
+    return send_from_directory(directory=destination_path, filename='destination.zip', as_attachment=True)
 
 @app.route("/save", methods=['POST'])
 def save_game():

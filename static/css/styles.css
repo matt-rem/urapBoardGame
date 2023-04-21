@@ -334,6 +334,7 @@ label {
 
 button {
   border-radius: 0;
+  margin-right: 50px;
 }
 
 button:focus:not(:focus-visible) {
